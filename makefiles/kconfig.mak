@@ -11,15 +11,15 @@ cmd_config: $(TEMP_DIR)/Kconfig
 .PHONY: $(TEMP_DIR)/Kconfig
 ifeq (,$(wildcard $(PROJECT_DIR)/Kconfig))
 $(TEMP_DIR)/Kconfig: $(TEMP_DIR)
-	$(TOUCH) $@
+	$Q$(TOUCH) $@
 else
 $(TEMP_DIR)/Kconfig: $(PROJECT_DIR)/Kconfig $(TEMP_DIR)
-	$(LUA) scripts/kconfig/preprocess.lua < $< > $@
+	$Q$(LUA) scripts/kconfig/preprocess.lua < $< > $@
 endif
 
 $(CONFIG_PATH):
-	$(STDERR) Please run cmd_config
-	$(EXIT) 1
+	$Q$(STDERR) Please run cmd_config
+	$Q$(EXIT) 1
 
 # If creating configuration,
 # don't load config
@@ -32,7 +32,7 @@ KCONFIG_LANGS := lua h sh rs
 
 define kconfig_gen_config_rule
 $(CACHE_DIR)/kconfig.$1: $(CONFIG_PATH) $(CACHE_DIR)
-	$(LUA) scripts/kconfig/gen_$1_config.lua < $$< >$$@
+	$Q$(LUA) scripts/kconfig/gen_$1_config.lua < $$< >$$@
 endef
 
 $(foreach lang, $(KCONFIG_LANGS), $(eval $(call kconfig_gen_config_rule,$(lang))))

@@ -1,11 +1,14 @@
 # This prepares the directories
 
 $(BUILD_DIR):
-	$(MKDIR) $(BUILD_DIR)
+	$Q$(MKDIR) $@
 
 $(TEMP_DIR):
-	$(MKDIR) $(TEMP_DIR)
+	$Q$(MKDIR) $@
 
 $(CACHE_DIR):
-	$(MKDIR) $(CACHE_DIR)
+	$Q$(MKDIR) $@
+
+$(OBJS_DIR):
+	$Q$(MKDIR) $@
 

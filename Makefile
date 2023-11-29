@@ -1,6 +1,8 @@
 # Initial makefile to chain call
 # to real makefiles/MainUwUMaker.mak
 
+MAKEFLAGS :=--no-print-directory
+
 ifndef PROJECT_DIR
   $(error Please pass PROJECT_DIR)
 endif

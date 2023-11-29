@@ -14,10 +14,11 @@ CONFIG_PATH ?= $(PROJECT_DIR)/.config
 
 BUILD_DIR		?= $(PROJECT_DIR)/build
 TEMP_DIR		?= $(BUILD_DIR)/temp
+OBJS_DIR		?= $(BUILD_DIR)/objs
 CACHE_DIR		?= $(BUILD_DIR)/cache
 
-SHELL       ?= $(Q)$(shell which dash)
-LUA					?= $(Q)$(shell which lua5.4)
+SHELL       ?= $(shell which dash)
+LUA					?= $(shell which lua5.4)
 
 # Prefixes #
 V ?= 0
@@ -29,15 +30,21 @@ endif
 ############
 
 # Common commands
-MKDIR		?= $(Q)mkdir -p
-RM			?= $(Q)rm
-RMDIR		?= $(Q)rm -r
-TOUCH		?= $(Q)touch
-COPY		?= $(Q)cp
-MOVE		?= $(Q)mv
-CAT			?= $(Q)cat
-EXIT		:= $(Q)exit
+MKDIR		?= mkdir -p
+RM			?= rm
+RMDIR		?= rm -r
+TOUCH		?= touch
+COPY		?= cp
+MOVE		?= mv
+CAT			?= cat
+EXIT		?= exit
 ########
+
+# Compiler and binutils
+LD			?= ld
+CC			?= cc
+AR			?= ar
+###############
 
 # Useful stuffs >w<
 COMMA := ,
@@ -46,15 +53,22 @@ NEWLINE := $(shell printf "\n")
 ##########
 
 # Some nice things
-STDERR	:= $(Q)>&2 echo
-STDOUT	:= $(Q)>&1 echo
+STDERR	:= >&2 echo
+STDOUT	:= >&1 echo
+PRINT_STATUS := scripts/print_status.sh
 ########
 
 include makefiles/kconfig.mak
 include makefiles/directories.mak
 
 .PHONY: cmd_all
-cmd_all:
-	echo "Hello UwU (Config at $(CONFIG_PATH))"
-	echo "Compiler selected is $(CONFIG_IS_CLANG)"
+cmd_all: $(OBJS_DIR)
+#	$(STDOUT) "Hello UwU (Config at $(CONFIG_PATH))"
+#	$(STDOUT) "Compiler selected is $(CONFIG_IS_CLANG)"
+	$(Q)$(MAKE) -f makefiles/subdir.mak SUBDIR= $(OBJS_DIR)/Executable
+
+
+
+
+
 
