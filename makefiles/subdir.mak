@@ -31,7 +31,7 @@ $(BUILD_SUBDIR)/Executable: $(BUILD_SUBDIR)/built_in.a
 
 .PHONY: cmd_clean
 cmd_clean:
-	@$(PRINT_STATUS) CLEAN "Cleaning '$(BUILD_SUBDIR)'"
+	@$(PRINT_STATUS) CLEAN "Cleaning '$(BUILD_SUBDIR:$(OBJS_DIR)/%=%)'"
 	$Q$(RM) $(BUILD_NO_DIR_OBJS) $(BUILD_SUBDIR)/Executable $(BUILD_SUBDIR)/built_in.a
 	@# Recurse to each dirs unconditionally
 	@$(foreach child,$(UwUMaker-dirs-y), $(MAKE) -f makefiles/subdir.mak SUBDIR=$(SUBDIR)/$(child) cmd_clean && ) true
