@@ -1,5 +1,5 @@
 
-UwUMaker-dirs-y += app
+UwUMaker-dirs-y += app common
 
 # Global flags (applies recursively)
 UwUMaker-c-flags			+= -g -DIM_FROM_ROOT_MAKEFILE=1

@@ -20,6 +20,7 @@ $1: $2 $(LANG_C_OBJS_DIR)
 	$Q$(CC) -c $2 $(UwUMaker-c-flags) -o $1
 endef
 
+# Create a recipe for each object file
 $(foreach obj,$(LANG_C_OBJS),$(eval $(call lang_c_compile,$(obj),$(obj:$(LANG_C_OBJS_DIR)/%.o=$(ABSOLUTE_SUBDIR)/%.c))))
 
 

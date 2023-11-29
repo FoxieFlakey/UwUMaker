@@ -1,7 +1,5 @@
 
-UwUMaker-c-sources-y += main.c
+UwUMaker-dirs-y += common
 
-# Per directory flags
-UwUMaker-c-flags	+= -DIM_LOCAL_FLAG=1
-UwUMaker-as-flags	+= -DIM_ASSEMBLER_LOCAL=1
+UwUMaker-c-sources-y += main.c
 

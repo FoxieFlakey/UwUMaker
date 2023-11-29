@@ -13,29 +13,28 @@ BUILD_DIR_OBJS		:= $(UwUMaker-dirs-y:%=$(BUILD_SUBDIR)/%/built_in.a)
 BUILD_NO_DIR_OBJS := $(LANG_C_OBJS) 
 BUILD_OBJECTS 		:= $(BUILD_DIR_OBJS) $(BUILD_NO_DIR_OBJS) 
 
-# Recurse to dirs
+# Recurse to dirs unconditionally
+.PHONY: $(BUILD_DIR_OBJS)
 $(BUILD_DIR_OBJS):
 	$Q$(MKDIR) $(@:/built_in.a=)
 	$Q$(MAKE) -f makefiles/subdir.mak SUBDIR=$(SUBDIR)/$(@:$(BUILD_SUBDIR)/%/built_in.a=%) $(abspath $@)
 
 # Group objects into one UwU
 $(BUILD_SUBDIR)/built_in.a: $(BUILD_OBJECTS)
-	@$(PRINT_STATUS) AR "Archiving '$@'"
+	@$(PRINT_STATUS) AR "Archiving '$(@:$(OBJS_DIR)/%=%)'"
 	$Q$(AR) qcs --thin $@ $(BUILD_OBJECTS)
 
 # Link into an executable
-# TODO: Something to fix why ld dont
-# search in correct paths
 $(BUILD_SUBDIR)/Executable: $(BUILD_SUBDIR)/built_in.a
-	@$(PRINT_STATUS) LD "Linking '$@'"
+	@$(PRINT_STATUS) LD "Linking '$(@:$(OBJS_DIR)/%=%)'"
 	$Q$(CC) $(BUILD_SUBDIR)/built_in.a $(UwUmaker-linker-flags) -o $@
 
 .PHONY: cmd_clean
 cmd_clean:
-	@$(PRINT_STATUS) CLEAN "Cleaning '$(SUBDIR)'"
+	@$(PRINT_STATUS) CLEAN "Cleaning '$(BUILD_SUBDIR)'"
 	$Q$(RM) $(BUILD_NO_DIR_OBJS) $(BUILD_SUBDIR)/Executable $(BUILD_SUBDIR)/built_in.a
 	@# Recurse to each dirs unconditionally
-	@$(foreach dir,$(UwUMaker-dirs-y), @$(MAKE) -f makefiles/subdir.mak SUBDIR=$(dir) cmd_clean && ) true
+	@$(foreach child,$(UwUMaker-dirs-y), $(MAKE) -f makefiles/subdir.mak SUBDIR=$(SUBDIR)/$(child) cmd_clean && ) true
 
 .PHONY: cmd_all
 ifeq ($(ABSOLUTE_SUBDIR),$(PROJECT_DIR))
