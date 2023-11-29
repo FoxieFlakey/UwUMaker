@@ -63,11 +63,11 @@ include makefiles/directories.mak
 
 .PHONY: cmd_all
 cmd_all: $(OBJS_DIR)
-#	$(STDOUT) "Hello UwU (Config at $(CONFIG_PATH))"
-#	$(STDOUT) "Compiler selected is $(CONFIG_IS_CLANG)"
-	$(Q)$(MAKE) -f makefiles/subdir.mak SUBDIR= $(OBJS_DIR)/Executable
+	$(Q)$(MAKE) -f makefiles/subdir.mak cmd_all
 
-
+.PHONY: cmd_clean
+cmd_clean:
+	$(Q)$(MAKE) -f makefiles/subdir.mak cmd_clean
 
 
 

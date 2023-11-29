@@ -9,6 +9,6 @@ UwUMaker-as-flags			+= -g -DIM_ASSEMBLER_FROM_ROOT_MAKEFILE=1
 # (applies recursively but useless as
 # each directory only generates
 # combined .o file)
-UwUMaker-linker-flags += -L/usr/lib -lpthread -lm -lc
+UwUMaker-linker-flags += -lpthread -lm
 
 
