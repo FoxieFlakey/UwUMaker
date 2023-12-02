@@ -10,39 +10,107 @@ include $(ABSOLUTE_SUBDIR)/Makefile
 include makefiles/langs.mak
 
 BUILD_DIR_OBJS		:= $(UwUMaker-dirs-y:%=$(BUILD_SUBDIR)/%/built_in.a)
-BUILD_NO_DIR_OBJS := $(LANG_C_OBJS) 
+BUILD_NO_DIR_OBJS := $(LANG_OBJS) 
 BUILD_OBJECTS 		:= $(BUILD_DIR_OBJS) $(BUILD_NO_DIR_OBJS) 
+ARCHIVE_NAME			:= $(BUILD_SUBDIR)/built_in.a
 
-# Recurse to dirs unconditionally
-.PHONY: $(BUILD_DIR_OBJS)
-$(BUILD_DIR_OBJS):
-	$Q$(MKDIR) $(@:/built_in.a=)
-	$Q$(MAKE) -f makefiles/subdir.mak SUBDIR=$(SUBDIR)/$(@:$(BUILD_SUBDIR)/%/built_in.a=%) $(abspath $@)
+# Determine whether current SUBDIR is top dir
+ifeq ($(PROJECT_DIR),$(ABSOLUTE_SUBDIR))
+IS_TOPDIR	:= y
+endif
+
+# Final product
+ifeq ($(UwUMaker-is-executable),y)
+FINAL_PRODUCT	:= $(BUILD_SUBDIR)/Executable
+endif
+
+ifeq ($(UwUMaker-is-executable),m)
+FINAL_PRODUCT	:= $(BUILD_SUBDIR)/lib.so
+endif
+
+ifeq ($(UwUMaker-is-executable),n)
+FINAL_PRODUCT	:= $(BUILD_SUBDIR)/lib.a
+endif
+
+ifneq ($(BUILD_SUBDIR),$(OBJS_DIR))
+$(BUILD_SUBDIR): $(OBJS_DIR)
+	$Q$(MKDIR) $@
+else
+$(BUILD_SUBDIR):
+endif
+
+# Link into final product
+ifdef IS_TOPDIR
+
+# Link into elf executable
+ifeq ($(UwUMaker-is-executable),y)
+$(FINAL_PRODUCT): $(ARCHIVE_NAME) | $(BUILD_SUBDIR)
+	@$(PRINT_STATUS) LD "Linking '$(@:$(OBJS_DIR)/%=%)'"
+	$Q$(CC) $(BUILD_SUBDIR)/built_in.a $(UwUMaker-linker-flags-y) -o $@
+endif
+
+# Link into .so
+ifeq ($(UwUMaker-is-executable),m)
+$(FINAL_PRODUCT): $(ARCHIVE_NAME) | $(BUILD_SUBDIR)
+	@$(PRINT_STATUS) LD "Linking '$(@:$(OBJS_DIR)/%=%)'"
+	$Q$(CC) $(BUILD_SUBDIR)/built_in.a $(UwUMaker-linker-flags-y) -shared -o $@
+endif
+
+# Link into .a
+ifeq ($(UwUMaker-is-executable),n)
+$(BUILD_SUBDIR)/lib.o: $(ARCHIVE_NAME) | $(BUILD_SUBDIR)
+	@$(PRINT_STATUS) LD "Linking 'lib.o'"
+	$Q$(CC) -r $(ARCHIVE_NAME) $(UwUMaker-linker-flags-y) -o $(BUILD_SUBDIR)/lib.o
+
+$(FINAL_PRODUCT): $(BUILD_SUBDIR)/lib.o | $(BUILD_SUBDIR)
+	@$(PRINT_STATUS) AR "Archiving '$(@:$(OBJS_DIR)/%=%)'"
+	$Q$(AR) rcs $(FINAL_PRODUCT) $(BUILD_SUBDIR)/lib.a
+endif
+
+else
+$(FINAL_PRODUCT):
+	$Q$(STDERR) "Attempting to generate final product from a subdir"
+	$Q$(EXIT) 1
+endif
+
+define call_subdir_rule
+.PHONY: /phonified_target_$1
+/phonified_target_$1: | $(BUILD_SUBDIR)
+	$Q$(MAKE) -f makefiles/subdir.mak SUBDIR=$(SUBDIR)/$(1:$(BUILD_SUBDIR)/%/built_in.a=%) $(MAKECMDGOALS)
+	
+endef
+
+# Create target for each subdir so make
+# can parallelize. Goal for each phonified
+# target is retrieved from MAKECMDGOALS
+$(foreach obj,$(BUILD_DIR_OBJS),$(eval $(call call_subdir_rule,$(obj))))
+
+# Commands
+.PHONY: call_subdirs
+call_subdirs: $(BUILD_DIR_OBJS:%=/phonified_target_%)
+	$(NOP)
+
+.PHONY: cmd_update_self
+cmd_update_self: $(BUILD_NO_DIR_OBJS) call_subdirs .WAIT $(ARCHIVE_NAME)
+	$(NOP)
 
 # Group objects into one UwU
-$(BUILD_SUBDIR)/built_in.a: $(BUILD_OBJECTS)
+$(ARCHIVE_NAME): $(BUILD_OBJECTS) | $(BUILD_SUBDIR)
 	@$(PRINT_STATUS) AR "Archiving '$(@:$(OBJS_DIR)/%=%)'"
 	$Q$(AR) qcs --thin $@ $(BUILD_OBJECTS)
 
-# Link into an executable
-$(BUILD_SUBDIR)/Executable: $(BUILD_SUBDIR)/built_in.a
-	@$(PRINT_STATUS) LD "Linking '$(@:$(OBJS_DIR)/%=%)'"
-	$Q$(CC) $(BUILD_SUBDIR)/built_in.a $(UwUmaker-linker-flags) -o $@
-
 .PHONY: cmd_clean
-cmd_clean:
+cmd_clean: clean_self call_subdirs
+
+.PHONY: cmd_clean_self
+clean_self:
 	@$(PRINT_STATUS) CLEAN "Cleaning '$(BUILD_SUBDIR:$(OBJS_DIR)/%=%)'"
-	$Q$(RM) $(BUILD_NO_DIR_OBJS) $(BUILD_SUBDIR)/Executable $(BUILD_SUBDIR)/built_in.a
-	@# Recurse to each dirs unconditionally
-	@$(foreach child,$(UwUMaker-dirs-y), $(MAKE) -f makefiles/subdir.mak SUBDIR=$(SUBDIR)/$(child) cmd_clean && ) true
+	-$Q$(RM) -f $(BUILD_NO_DIR_OBJS) $(FINAL_PRODUCT) $(BUILD_SUBDIR)/built_in.a $(DUMMY_OBJECT_FILE) 1>&2
 
 .PHONY: cmd_all
-ifeq ($(ABSOLUTE_SUBDIR),$(PROJECT_DIR))
-cmd_all: $(BUILD_SUBDIR)/Executable
-else
-cmd_all: $(BUILD_SUBDIR)/built_in.a
-endif
-
+cmd_all: cmd_update_self
+	@# Re-exec so makefile can see changes
+	$Q$(MAKE) -f makefiles/subdir.mak $(FINAL_PRODUCT)
 
 
 

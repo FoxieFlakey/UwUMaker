@@ -2,13 +2,14 @@
 UwUMaker-dirs-y += app common
 
 # Global flags (applies recursively)
-UwUMaker-c-flags			+= -g -DIM_FROM_ROOT_MAKEFILE=1
-UwUMaker-as-flags			+= -g -DIM_ASSEMBLER_FROM_ROOT_MAKEFILE=1
+UwUMaker-c-flags-y			+= -g -DIM_FROM_ROOT_MAKEFILE=1
 
 # Linker flags for final Executable
-# (applies recursively but useless as
-# each directory only generates
-# combined .o file)
-UwUMaker-linker-flags += -lpthread -lm
+# (applies only to top makefile)
+UwUMaker-linker-flags-y += -lpthread -lm
 
+# y mean yes (default), Generates file named Executable
+# m mean module, Generates file named lib.so
+# n mean no, Generates file named lib.a
+UwUMaker-is-executable = n
 

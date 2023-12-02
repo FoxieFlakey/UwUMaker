@@ -30,14 +30,15 @@ endif
 ############
 
 # Common commands
-MKDIR		?= mkdir -p
-RM			?= rm
-RMDIR		?= rm -r
-TOUCH		?= touch
-COPY		?= cp
-MOVE		?= mv
-CAT			?= cat
-EXIT		?= exit
+ECHO			?= echo
+MKDIR			?= mkdir -p
+RM				?= rm
+RMDIR			?= rm -r
+TOUCH			?= touch
+COPY			?= cp
+MOVE			?= mv
+CAT				?= cat
+EXIT			?= exit
 ########
 
 # Compiler and binutils
@@ -49,13 +50,13 @@ AR			?= ar
 # Useful stuffs >w<
 COMMA := ,
 SPACE := $(shell printf " ")
-NEWLINE := $(shell printf "\n")
 ##########
 
 # Some nice things
-STDERR	:= >&2 echo
-STDOUT	:= >&1 echo
-PRINT_STATUS := scripts/print_status.sh
+STDERR				:= >&2 echo
+STDOUT				:= >&1 echo
+PRINT_STATUS	:= scripts/print_status.sh
+NOP						:= @:
 ########
 
 include makefiles/kconfig.mak
