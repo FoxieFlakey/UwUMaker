@@ -1,11 +1,18 @@
 #!/usr/bin/env lua5.4
 -- Generates lua config
 
-print([[local n = 0
-local m = 1
-local y = 2
+print([[local n = {}
+local m = {}
+local y = {}
 
-local M = {]])
+local M = {
+  KconfigTriState = {
+    n = n,
+    m = m,
+    y = y
+  },
+  config = {
+]])
 
 function processOneLine(line)
   if line:sub(1,1) == "#" then
@@ -13,13 +20,14 @@ function processOneLine(line)
   end
 
   local name, value = line:match("^([^=]+)=(.+)$")
-  print(("  [%q] = %s,"):format(name, value))
+  print(("    [%q] = %s,"):format(name, value))
 end
 
 for line in io.stdin:lines() do
   processOneLine(line)
 end
 
-print([[}
+print([[  }
+}
 return M]])
 

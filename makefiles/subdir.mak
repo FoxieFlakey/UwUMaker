@@ -1,4 +1,5 @@
 # Recipes for each subdir
+.DELETE_ON_ERROR:
 
 # Got from command line
 SUBDIR 					:= $(SUBDIR)
@@ -7,7 +8,9 @@ ABSOLUTE_SUBDIR	:= $(abspath $(PROJECT_DIR)/$(SUBDIR))
 BUILD_SUBDIR 		:= $(abspath $(OBJS_DIR)/$(SUBDIR))
 
 include $(ABSOLUTE_SUBDIR)/Makefile
-include makefiles/langs.mak
+
+include makefiles/kconfig.mak
+include makefiles/langs/langs.mak
 
 BUILD_DIR_OBJS		:= $(UwUMaker-dirs-y:%=$(BUILD_SUBDIR)/%/built_in.a)
 BUILD_NO_DIR_OBJS := $(LANG_OBJS) 
@@ -108,10 +111,7 @@ clean_self:
 	-$Q$(RM) -f $(BUILD_NO_DIR_OBJS) $(FINAL_PRODUCT) $(BUILD_SUBDIR)/built_in.a $(DUMMY_OBJECT_FILE) 1>&2
 
 .PHONY: cmd_all
-cmd_all: cmd_update_self
-	@# Re-exec so makefile can see changes
-	$Q$(MAKE) -f makefiles/subdir.mak $(FINAL_PRODUCT)
-
-
+cmd_all: cmd_update_self .WAIT $(FINAL_PRODUCT)
+	$(NOP)
 
 

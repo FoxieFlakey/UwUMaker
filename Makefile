@@ -4,7 +4,11 @@
 MAKEFLAGS += --no-print-directory -rR
 
 ifndef PROJECT_DIR
-  $(error Please pass PROJECT_DIR)
+  $(error "Please pass PROJECT_DIR")
+endif
+
+ifneq (1,$(words [$(PROJECT_DIR)]))
+	$(error "Please put PROJECT_DIR in path without spaces (there some little bugs about path with spaces -w-")
 endif
 
 ABS_PROJECT_DIR := $(shell readlink -f $(PROJECT_DIR))

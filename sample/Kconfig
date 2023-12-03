@@ -15,3 +15,8 @@ config TRISTATE
 config INTEGER_UWU
   int "Gib number *squeak*"
 
+if IS_CLANG
+config FUWA_FUWA
+  bool "There pat pat"
+endif
+

@@ -11,5 +11,6 @@ UwUMaker-linker-flags-y += -lpthread -lm
 # y mean yes (default), Generates file named Executable
 # m mean module, Generates file named lib.so
 # n mean no, Generates file named lib.a
-UwUMaker-is-executable = n
+UwUMaker-is-executable = y
+
 
