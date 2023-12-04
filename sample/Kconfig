@@ -20,3 +20,7 @@ config FUWA_FUWA
   bool "There pat pat"
 endif
 
+config CC_VERSION
+  string
+  default $(shell "$(CC) --version")
+
