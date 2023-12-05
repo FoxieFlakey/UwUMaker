@@ -1,107 +1,92 @@
 #!/usr/bin/env lua5.4
--- Input in stdin and output at stdout
--- also follows includes
 
-local vars = setmetatable({}, {
-  __index = function (self, key)
-    return os.getenv(key)
-  end
-})
+if #arg ~= 2 then
+  io.stderr:write("Usage: "..arg[0].." <input Kconfig dir> <output dir>\n")
+  os.exit(1)
+end
+  
+local inputDir = arg[1]
+local outputDir = arg[2]
 
--- Control how deep includes goes
-local depth = 0
-local maxDepth = 200
 local includeStack = {}
 
-local input = io.stdin
-local output = io.stdout
-local pos = {
-  line = 1,
-  char = 0
-}
+local maxDepth = 200
+local maxSubstDepth = 50
 
-function posInfo()
-  return ("%d:%d"):format(pos.line, pos.char)
+function quitWithError(errmsg)
+  io.stderr:write("Error: "..errmsg.."\n")
+  for _, file in ipairs(includeStack) do
+    io.stderr:write(("At file '%s', line %d\n"):format(file.path, file.line))
+  end
+  os.exit(1)
 end
 
-function getChar()
-  local chr = input:read(1)
-  if not chr then
-    io.stderr:write(posInfo()..": EOF unexpected\n")
-    os.exit(1)
+local substDepth = 0
+function doSubst(str)
+  if substDepth >= maxSubstDepth then
+    quitWithError("Too many nested substitution")
   end
 
-  if chr == "\n" then
-    pos.line = pos.line + 1
-    pos.char = 0
-  else
-    pos.char = pos.char + 1
-  end
-  return chr
-end
-
-function expandMacro()
-
-end
-
-function processChar(chr)
-  if chr ~= "$" then
-    output:write(chr)
-    return
-  end
-
-  local buffer = {}
-  chr = getChar()
-  if chr ~= "(" and chr ~= "$" then
-    io.stderr:write(posInfo()..": Expected '(' or '$' got '"..chr.."'\n")
-    os.exit(1)
-  end
-  
-  -- Escaping the $
-  if chr == "$" then
-    output:write("$")
-    return
-  end
-
-  -- Continue reading until matching ')'
-  
-  chr = getChar()
-  while chr ~= ")" do
-    if chr == "(" and buffer[#buffer] == "$" then
-      io.stderr:write(posInfo()..": Nested macro not supported yet: "..table.concat(buffer).."\n")
-      os.exit(1)
-    elseif chr == "$" and buffer[#buffer] == "$" then
-      -- Remove last $ (escaping $$)
-      table.remove(buffer)
-    end
-    table.insert(buffer, chr)
-
-    local stringStarter
+  substDepth = substDepth + 1
+  local res = str:gsub("(%$[[]([=]*)[[](.-)[%]]%2[%]])", function (orig, _, content)
+    -- Try substitute recursively
+    content = doSubst(content)
     
-    if chr == "\"" or chr == "\'" then
-      stringStarter = chr
-    end
+    print("Exec: "..content)
+    -- Do the substitution
+    local handle<close> = assert(io.popen(content))
+    local res = assert(handle:read("*a"))
+    assert(handle:close())
+    return res:gsub("([^\n])[\n]?$", "%1")
+  end)
+  substDepth = substDepth - 1
+  return res
+end
 
-    if stringStarter then
-      while chr ~= stringStarter do
-        chr = getChar()
-        table.insert(buffer, chr)
-      end
-    end
+outputPath = outputDir.."/Kconfig"
 
-    chr = getChar()
+function preprocOneFile(inputPath, outputPath)
+  if #includeStack == maxDepth then
+    quitWithError("Include nests too deep (recursive include??)")
   end
-  buffer = table.concat(buffer):sub(1, -2)
 
-  expandMacro(buffer)
+  local current = {
+    path = inputPath,
+    outputPath = outputPath,
+    line = 1
+  }
+  table.insert(includeStack, current)
+
+  local inputHandle<close>, err = io.open(inputPath)
+  if not inputHandle then
+    quitWithError(("Cannot open input '%s': %s"):format(inputPath, err))
+  end
+  local outputHandle<close>, err = io.open(outputPath, "w")
+  if not outputHandle then
+    quitWithError(("Cannot open output '%s': %s"):format(outputPath, err))
+  end
+    
+  for line in inputHandle:lines() do
+    -- Reset substDepth
+    substDepth = 0
+    
+    -- Include detected!
+    local includePath = select(2, string.match(line, "^[ ]*source[ ]*([\"\'])(.-)%1"))
+    if includePath then
+      -- Gsub away file name part and create directory structure UwU
+      assert(os.execute("$MKDIR -p '"..outputDir.."/"..includePath:gsub("[^/]-$", "").."'"))
+      preprocOneFile(inputDir.."/"..includePath, outputDir.."/"..includePath)
+    else
+      outputHandle:write(doSubst(line))
+      outputHandle:write("\n")
+    end
+
+    current.line = current.line + 1
+  end
 end
 
-local chr = getChar()
-while chr ~= nil do
-  processChar(chr)
-  chr = getChar()
-end
-
+-- Start preprocessing
+preprocOneFile(inputDir.."/Kconfig", outputDir.."/Kconfig")
 
 
 

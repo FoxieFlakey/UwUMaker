@@ -22,5 +22,10 @@ endif
 
 config CC_VERSION
   string
-  default $(shell "$(CC) --version")
+  default "$[=[$CC --version | head -1]=]"
+
+source "app/Kconfig.app"
+
+
+
 

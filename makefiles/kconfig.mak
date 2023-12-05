@@ -5,6 +5,7 @@ KCONFIG_LANGS := lua h sh rs
 KCONFIG_KNOBS_DIR	:= $(CACHE_DIR)/knobs
 KCONFIG_LANG_CONFIG_DIR	:= $(CACHE_DIR)/config/generated
 KCONFIG_LANG_CONFIG_FILES	:= $(foreach lang,$(KCONFIG_LANGS),$(KCONFIG_LANG_CONFIG_DIR)/kconfig_config.$(lang))
+KCONFIG_PREPROCESSED_DIR	:= $(TEMP_DIR)/kconfig_preproc
 
 $(KCONFIG_LANG_CONFIG_DIR): $(CACHE_DIR)
 	$Q$(MKDIR) $@
@@ -12,13 +13,16 @@ $(KCONFIG_LANG_CONFIG_DIR): $(CACHE_DIR)
 $(KCONFIG_KNOBS_DIR): $(CACHE_DIR)
 	$Q$(MKDIR) $@
 
+$(KCONFIG_PREPROCESSED_DIR): $(TEMP_DIR)
+	$Q$(MKDIR) $@
+
 .PHONY: cmd_menuconfig
-cmd_menuconfig: $(TEMP_DIR)/Kconfig
-	$(Q)cd $(PROJECT_DIR) && kconfig-mconf $<
+cmd_menuconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && SRCTREE=$(PROJECT_DIR) kconfig-mconf $<
 
 .PHONY: cmd_config
-cmd_config: $(TEMP_DIR)/Kconfig
-	$(Q)cd $(PROJECT_DIR) && kconfig-conf $<
+cmd_config: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf $<
 
 .PHONY: cmd_kconfig_clean
 cmd_kconfig_clean: | $(CACHE_DIR)
@@ -30,12 +34,16 @@ cmd_kconfig_clean: | $(CACHE_DIR)
 .PHONY: $(TEMP_DIR)/Kconfig
 ifeq (,$(wildcard $(PROJECT_DIR)/Kconfig))
 # Project dont have kconfig so give empty
-$(TEMP_DIR)/Kconfig: | $(TEMP_DIR)
+$(KCONFIG_PREPROCESSED_DIR)/Kconfig: | $(KCONFIG_PREPROCESSED_DIR)
 	$Q$(TOUCH) $@
 else
-$(TEMP_DIR)/Kconfig: $(PROJECT_DIR)/Kconfig | $(TEMP_DIR)
+# Phony because preprocessing also calls to
+# shell which may provide different output
+.PHONY: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+$(KCONFIG_PREPROCESSED_DIR)/Kconfig: $(PROJECT_DIR)/Kconfig | $(KCONFIG_PREPROCESSED_DIR)
 	@$(PRINT_STATUS) PREPROC "Preprocessing $<"
-	$Q$(LUA) scripts/kconfig/preprocess.lua < $< > $@
+	$Q$(LUA) scripts/kconfig/preprocess.lua "$(PROJECT_DIR)" "$(KCONFIG_PREPROCESSED_DIR)"
+
 endif
 
 $(DOTCONFIG_PATH):

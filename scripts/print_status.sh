@@ -1,7 +1,7 @@
 #!/usr/bin/env dash
 
-if [ $# -lt 2 ]; then
-  echo "Usage $0 <command> <file>"
+if [ ! $# -eq 2 ]; then
+  echo "Usage $0 <short status> <long status>"
   exit 1
 fi
 
