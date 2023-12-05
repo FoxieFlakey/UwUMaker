@@ -32,7 +32,6 @@ function doSubst(str)
     -- Try substitute recursively
     content = doSubst(content)
     
-    print("Exec: "..content)
     -- Do the substitution
     local handle<close> = assert(io.popen(content))
     local res = assert(handle:read("*a"))
