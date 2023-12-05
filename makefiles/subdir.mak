@@ -9,6 +9,16 @@ BUILD_SUBDIR 		:= $(abspath $(OBJS_DIR)/$(SUBDIR))
 
 include $(ABSOLUTE_SUBDIR)/Makefile
 
+# Determine whether current SUBDIR is top dir
+ifeq ($(PROJECT_DIR),$(ABSOLUTE_SUBDIR))
+IS_TOPDIR	:= y
+endif
+
+ifdef IS_TOPDIR
+UwUMaker-c-flags-y += $(shell pkg-config --cflags $(UwUMaker-pkg-config-libs-y))
+UwUMaker-linker-flags-y += $(shell pkg-config --libs $(UwUMaker-pkg-config-libs-y))
+endif
+
 include makefiles/kconfig.mak
 include makefiles/langs/langs.mak
 
@@ -16,11 +26,6 @@ BUILD_DIR_OBJS		:= $(UwUMaker-dirs-y:%=$(BUILD_SUBDIR)/%/built_in.a)
 BUILD_NO_DIR_OBJS := $(LANG_OBJS) 
 BUILD_OBJECTS 		:= $(BUILD_DIR_OBJS) $(BUILD_NO_DIR_OBJS) 
 ARCHIVE_NAME			:= $(BUILD_SUBDIR)/built_in.a
-
-# Determine whether current SUBDIR is top dir
-ifeq ($(PROJECT_DIR),$(ABSOLUTE_SUBDIR))
-IS_TOPDIR	:= y
-endif
 
 # Final product
 ifeq ($(UwUMaker-is-executable),y)
@@ -71,6 +76,14 @@ $(FINAL_PRODUCT): $(BUILD_SUBDIR)/lib.o | $(BUILD_SUBDIR)
 endif
 
 else
+ifdef UwUMaker-is-executable
+	$(error "Subdir must not define or use UwUMaker-is-executable")
+endif
+
+ifdef UwUMaker-pkg-config-libs-y
+	$(error "Subdir must not define or use UwUMaker-pkg-config-libs-y")
+endif
+
 $(FINAL_PRODUCT):
 	$Q$(STDERR) "Attempting to generate final product from a subdir"
 	$Q$(EXIT) 1

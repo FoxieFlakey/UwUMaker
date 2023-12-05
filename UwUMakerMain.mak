@@ -79,13 +79,13 @@ cmd_clean: clean_subdir cmd_kconfig_clean
 
 .PHONY: cmd_clean_cache
 cmd_clean_cache:
-	$Q$(PRINT_STATUS) CLEAN Cleaning caches
-	-$Q$(RMDIR) $(CACHE_DIR)
+	$Q$(PRINT_STATUS) CLEAN "Cleaning caches"
+	-$Q$(RMDIR) -f $(CACHE_DIR)
 
 # Deletes everything in $(BUILD_DIR)
 .PHONY: cmd_sanitize
 cmd_sanitize:
-	$Q$(PRINT_STATUS) RM Deleting build dir
-	-$Q$(RMDIR)  $(BUILD_DIR)
+	$Q$(PRINT_STATUS) RM "Deleting build dir"
+	-$Q$(RMDIR) -f $(BUILD_DIR)
 
 

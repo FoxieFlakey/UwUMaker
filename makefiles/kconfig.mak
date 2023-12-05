@@ -27,9 +27,9 @@ cmd_config: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
 .PHONY: cmd_kconfig_clean
 cmd_kconfig_clean: | $(CACHE_DIR)
 	@$(PRINT_STATUS) CLEAN "Deleting config files for all languages"
-	-$Q$(RM) $(KCONFIG_LANG_CONFIG_FILES)
+	-$Q$(RM) -f $(KCONFIG_LANG_CONFIG_FILES)
 	@$(PRINT_STATUS) CLEAN "Deleting knobs"
-	-$Q$(RM) $(KCONFIG_KNOBS_DIR)/CONFIG_*
+	-$Q$(RM) -f $(KCONFIG_KNOBS_DIR)/CONFIG_*
 
 .PHONY: $(TEMP_DIR)/Kconfig
 ifeq (,$(wildcard $(PROJECT_DIR)/Kconfig))
