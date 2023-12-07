@@ -1,5 +1,7 @@
 #!/usr/bin/env dash
 
+set -e
+
 if [ $# -lt 1 ] || [ $# -gt 2 ]; then
   echo "Usage *squeak*: '$0' <filename> [error msg]" >&2
   exit 1

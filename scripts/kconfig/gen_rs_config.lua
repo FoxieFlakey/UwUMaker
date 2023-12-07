@@ -23,6 +23,9 @@ function processOneLine(line)
   end
 
   local name, value = line:match("^([^=]+)=(.+)$")
+  if not name then
+    return
+  end
   io.write("const "..name..": ")
   if value:sub(1,1) == "\"" then
     io.write("&str = "..value..";")

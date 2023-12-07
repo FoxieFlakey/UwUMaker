@@ -5,9 +5,13 @@ function processOneLine(line)
   if line:sub(1,1) == "#" then
     return
   end
+  
+  if not line:match("^(^=)-)=.*$") then
+    return
+  end
 
   io.write("#define ")
-  io.write((line:gsub("^([^=]+)=", "%1 ")))
+  io.write((line:gsub("^([^=]-)=", "%1 ")))
   print()
 end
 

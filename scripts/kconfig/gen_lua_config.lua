@@ -20,6 +20,9 @@ function processOneLine(line)
   end
 
   local name, value = line:match("^([^=]+)=(.+)$")
+  if not name then
+    return
+  end
   print(("    [%q] = %s,"):format(name, value))
 end
 

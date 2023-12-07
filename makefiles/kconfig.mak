@@ -24,6 +24,34 @@ cmd_menuconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
 cmd_config: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
 	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf $<
 
+.PHONY: cmd_oldconfig
+cmd_oldconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --oldaskconfig $<
+
+.PHONY: cmd_olddefconfig
+cmd_olddefconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --olddefconfig $<
+
+.PHONY: cmd_randconfig
+cmd_randconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --randconfig $<
+
+.PHONY: cmd_allyesconfig
+cmd_allyesconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --allyesconfig $<
+
+.PHONY: cmd_allnoconfig
+cmd_allnoconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --allnoconfig $<
+
+.PHONY: cmd_allmodconfig
+cmd_allmodconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --allmodconfig $<
+
+.PHONY: cmd_alldefconfig
+cmd_alldefconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --alldefconfig $<
+
 .PHONY: cmd_kconfig_clean
 cmd_kconfig_clean: | $(CACHE_DIR)
 	@$(PRINT_STATUS) CLEAN "Deleting config files for all languages"
@@ -35,6 +63,7 @@ cmd_kconfig_clean: | $(CACHE_DIR)
 ifeq (,$(wildcard $(PROJECT_DIR)/Kconfig))
 # Project dont have kconfig so give empty
 $(KCONFIG_PREPROCESSED_DIR)/Kconfig: | $(KCONFIG_PREPROCESSED_DIR)
+	@$(PRINT_STATUS) PREPROC "Kconfig not preprocessed, project has no Kconfig"
 	$Q$(TOUCH) $@
 else
 # Phony because preprocessing also calls to
@@ -52,13 +81,14 @@ $(DOTCONFIG_PATH):
 
 define kconfig_gen_config_rule
 $1: $(DOTCONFIG_PATH) | $(CACHE_DIR) $(KCONFIG_LANG_CONFIG_DIR)
-	$Q$(PRINT_STATUS) GEN_CONFIG 'Generating config file for $(suffix $1)'; $(LUA) scripts/kconfig/gen_$(subst .,,$(suffix $1))_config.lua < $$< >$$@
+	$Q$(PRINT_STATUS) GEN_CONFIG 'Generating config file for $(suffix $1)'
+	$Q$(LUA) scripts/kconfig/gen_$(subst .,,$(suffix $1))_config.lua < $$< >$$@
 
 endef
 
 $(foreach config_file,$(KCONFIG_LANG_CONFIG_FILES),$(eval $(call kconfig_gen_config_rule,$(config_file))))
 
-$(KCONFIG_KNOBS_DIR)/knobs_dummy.mak: $(DOTCONFIG_PATH) | $(KCONFIG_KNOBS_DIR)
+$(KCONFIG_KNOBS_DIR)/knobs_dummy.txt: $(DOTCONFIG_PATH) | $(KCONFIG_KNOBS_DIR)
 	@$(PRINT_STATUS) UPDATE "Updating knobs"
 	$Q$(LUA) scripts/kconfig/update_knobs.lua
 	$Q$(STDOUT) "Content don't matter UwU only update time so make know when to do its thing UwU" > $@

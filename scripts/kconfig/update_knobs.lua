@@ -35,8 +35,8 @@ do
   local config = {}
 
   for line in assert(configFile:lines()) do
-    if line:sub(1,1) ~= "#" then
-      local key, value = line:match("^([^=]+)=(.+)$")
+    if line:sub(1,1) ~= "#" and line:match("^CONFIG_") ~= nil then
+      local key, value = line:match("^([^=]-)=(.*)$")
       table.insert(config, {
         key = key,
         value = value

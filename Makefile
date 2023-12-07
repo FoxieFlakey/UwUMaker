@@ -11,6 +11,10 @@ ifneq (1,$(words [$(PROJECT_DIR)]))
 	$(error "Please put PROJECT_DIR in path without spaces (there some little bugs about path with spaces -w-")
 endif
 
+ifneq ($(PROJECT_DIR),$(abspath $(PROJECT_DIR)))
+	$(error "Please put PROJECT_DIR as absolute path -w-")
+endif
+
 ABS_PROJECT_DIR := $(shell readlink -f $(PROJECT_DIR))
 
 ifeq ($(words $(MAKECMDGOALS)),0)

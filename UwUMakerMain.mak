@@ -41,7 +41,7 @@ COPY			?= cp
 MOVE			?= mv
 CAT				?= cat
 EXIT			?= exit
-FLOCK			?= flock
+TRUNCATE	?= truncate
 ########
 
 # Compiler and binutils
@@ -66,7 +66,7 @@ include makefiles/kconfig.mak
 include makefiles/directories.mak
 
 .PHONY: cmd_all
-cmd_all: kconfig_gen_config_files $(OBJS_DIR)
+cmd_all: kconfig_gen_config_files | $(OBJS_DIR) $(TEMP_DIR)
 	$Q$(MAKE) -f makefiles/subdir.mak cmd_all
 
 .PHONY: cmd_clean
@@ -78,13 +78,13 @@ cmd_clean: clean_subdir cmd_kconfig_clean
 	$(NOP)
 
 .PHONY: cmd_clean_cache
-cmd_clean_cache:
+cmd_clean_cache: | $(CACHE_DIR)
 	$Q$(PRINT_STATUS) CLEAN "Cleaning caches"
 	-$Q$(RMDIR) -f $(CACHE_DIR)
 
 # Deletes everything in $(BUILD_DIR)
 .PHONY: cmd_sanitize
-cmd_sanitize:
+cmd_sanitize: | $(BUILD_DIR)
 	$Q$(PRINT_STATUS) RM "Deleting build dir"
 	-$Q$(RMDIR) -f $(BUILD_DIR)
 

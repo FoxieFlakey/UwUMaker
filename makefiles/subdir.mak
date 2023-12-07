@@ -15,8 +15,10 @@ IS_TOPDIR	:= y
 endif
 
 ifdef IS_TOPDIR
+ifneq (0,$(words $(UwUMaker-pkg-config-libs-y)))
 UwUMaker-c-flags-y += $(shell pkg-config --cflags $(UwUMaker-pkg-config-libs-y))
 UwUMaker-linker-flags-y += $(shell pkg-config --libs $(UwUMaker-pkg-config-libs-y))
+endif
 endif
 
 include makefiles/kconfig.mak
@@ -72,7 +74,9 @@ $(BUILD_SUBDIR)/lib.o: $(ARCHIVE_NAME) | $(BUILD_SUBDIR)
 
 $(FINAL_PRODUCT): $(BUILD_SUBDIR)/lib.o | $(BUILD_SUBDIR)
 	@$(PRINT_STATUS) AR "Archiving '$(@:$(OBJS_DIR)/%=%)'"
-	$Q$(AR) rcs $(FINAL_PRODUCT) $(BUILD_SUBDIR)/lib.a
+	@# Make sure ar recreates
+	$Q$(RM) -f $@
+	$Q$(AR) rcsP $@ $(BUILD_SUBDIR)/lib.a
 endif
 
 else
@@ -113,7 +117,9 @@ cmd_update_self: $(BUILD_NO_DIR_OBJS) call_subdirs .WAIT $(ARCHIVE_NAME)
 # Group objects into one UwU
 $(ARCHIVE_NAME): $(BUILD_OBJECTS) | $(BUILD_SUBDIR)
 	@$(PRINT_STATUS) AR "Archiving '$(@:$(OBJS_DIR)/%=%)'"
-	$Q$(AR) qcs --thin $@ $(BUILD_OBJECTS)
+	@# Make sure ar recreates
+	$Q$(RM) -f $@
+	$Q$(AR) rcsP --thin $@ $(BUILD_OBJECTS)
 
 .PHONY: cmd_clean
 cmd_clean: clean_self call_subdirs

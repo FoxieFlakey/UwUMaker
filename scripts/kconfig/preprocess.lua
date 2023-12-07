@@ -5,9 +5,6 @@ if #arg ~= 2 then
   os.exit(1)
 end
   
-local inputDir = arg[1]
-local outputDir = arg[2]
-
 local includeStack = {}
 
 local maxDepth = 200
@@ -15,7 +12,8 @@ local maxSubstDepth = 50
 
 function quitWithError(errmsg)
   io.stderr:write("Error: "..errmsg.."\n")
-  for _, file in ipairs(includeStack) do
+  for i=#includeStack,1,-1 do
+    local file = includeStack[i]
     io.stderr:write(("At file '%s', line %d\n"):format(file.path, file.line))
   end
   os.exit(1)
@@ -42,12 +40,13 @@ function doSubst(str)
   return res
 end
 
-outputPath = outputDir.."/Kconfig"
-
 function preprocOneFile(inputPath, outputPath)
   if #includeStack == maxDepth then
     quitWithError("Include nests too deep (recursive include??)")
   end
+  
+  local inputDir = inputPath:gsub("[^/]-$", "")
+  local outputDir = outputPath:gsub("[^/]-$", "")
 
   local current = {
     path = inputPath,
@@ -68,16 +67,17 @@ function preprocOneFile(inputPath, outputPath)
   for line in inputHandle:lines() do
     -- Reset substDepth
     substDepth = 0
+    line = doSubst(line)
     
+    outputHandle:write(line)
+    outputHandle:write("\n")
+
     -- Include detected!
     local includePath = select(2, string.match(line, "^[ ]*source[ ]*([\"\'])(.-)%1"))
     if includePath then
       -- Gsub away file name part and create directory structure UwU
-      assert(os.execute("$MKDIR -p '"..outputDir.."/"..includePath:gsub("[^/]-$", "").."'"))
+      assert(os.execute("$MKDIR -p '"..outputDir.."/'"))
       preprocOneFile(inputDir.."/"..includePath, outputDir.."/"..includePath)
-    else
-      outputHandle:write(doSubst(line))
-      outputHandle:write("\n")
     end
 
     current.line = current.line + 1
@@ -85,6 +85,8 @@ function preprocOneFile(inputPath, outputPath)
 end
 
 -- Start preprocessing
+local inputDir = arg[1]
+local outputDir = arg[2]
 preprocOneFile(inputDir.."/Kconfig", outputDir.."/Kconfig")
 
 
