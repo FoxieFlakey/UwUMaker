@@ -101,7 +101,7 @@ include $(DOTCONFIG_PATH)
 endif
 
 .PHONY: kconfig_update_knobs
-kconfig_update_knobs: $(KCONFIG_KNOBS_DIR)/knobs_dummy.mak
+kconfig_update_knobs: $(KCONFIG_KNOBS_DIR)/knobs_dummy.txt
 	$(NOP)
 
 .PHONY: kconfig_gen_config_files

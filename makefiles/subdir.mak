@@ -7,6 +7,9 @@ SUBDIR 					:= $(SUBDIR)
 ABSOLUTE_SUBDIR	:= $(abspath $(PROJECT_DIR)/$(SUBDIR))
 BUILD_SUBDIR 		:= $(abspath $(OBJS_DIR)/$(SUBDIR))
 
+# Variables accessible to project's makefile
+CURRENT_DIR	:= $(ABSOLUTE_SUBDIR)
+PROJECT_DIR	:= $(PROJECT_DIR)
 include $(ABSOLUTE_SUBDIR)/Makefile
 
 # Determine whether current SUBDIR is top dir
