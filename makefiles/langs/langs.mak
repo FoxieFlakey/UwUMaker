@@ -6,7 +6,10 @@ LANG_OBJS					:= $(LANG_OBJS)
 LANG_OBJ_RULES		:= $(LANG_OBJ_RULES)
 
 # Contains recipes for how to build each
-LANG_RULES_DIR		:= $(abspath $(CACHE_DIR)/lang_rules/$(SUBDIR))
+LANG_RULES_DIR		:= $(abspath $(BUILD_DIR)/lang_rules/$(SUBDIR))
+
+# Contains compile_commands.json fragments
+LANG_COMPILE_COMMAND_FRAGMENT_FILES :=
 
 $(LANG_RULES_DIR): $(CACHE_DIR)
 	$Q$(MKDIR) $@
@@ -15,7 +18,10 @@ $(LANG_RULES_DIR): $(CACHE_DIR)
 $(LANG_OBJS_DIR): $(BUILD_SUBDIR)
 	$Q$(MKDIR) $@
 
+# Append language includes supports here
 include makefiles/langs/c.mak
 
 include $(wildcard $(LANG_OBJ_RULES))
+
+COMPILE_COMMAND_FILES += $(LANG_COMPILE_COMMAND_FRAGMENT_FILES)
 

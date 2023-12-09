@@ -16,49 +16,6 @@ $(KCONFIG_KNOBS_DIR): $(CACHE_DIR)
 $(KCONFIG_PREPROCESSED_DIR): $(TEMP_DIR)
 	$Q$(MKDIR) $@
 
-.PHONY: cmd_menuconfig
-cmd_menuconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && SRCTREE=$(PROJECT_DIR) kconfig-mconf $<
-
-.PHONY: cmd_config
-cmd_config: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf $<
-
-.PHONY: cmd_oldconfig
-cmd_oldconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --oldaskconfig $<
-
-.PHONY: cmd_olddefconfig
-cmd_olddefconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --olddefconfig $<
-
-.PHONY: cmd_randconfig
-cmd_randconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --randconfig $<
-
-.PHONY: cmd_allyesconfig
-cmd_allyesconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --allyesconfig $<
-
-.PHONY: cmd_allnoconfig
-cmd_allnoconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --allnoconfig $<
-
-.PHONY: cmd_allmodconfig
-cmd_allmodconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --allmodconfig $<
-
-.PHONY: cmd_alldefconfig
-cmd_alldefconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && KCONFIG_CONFIG=$(DOTCONFIG_PATH) kconfig-conf --alldefconfig $<
-
-.PHONY: cmd_kconfig_clean
-cmd_kconfig_clean: | $(CACHE_DIR)
-	@$(PRINT_STATUS) CLEAN "Deleting config files for all languages"
-	-$Q$(RM) -f $(KCONFIG_LANG_CONFIG_FILES)
-	@$(PRINT_STATUS) CLEAN "Deleting knobs"
-	-$Q$(RM) -f $(KCONFIG_KNOBS_DIR)/CONFIG_*
-
 .PHONY: $(TEMP_DIR)/Kconfig
 ifeq (,$(wildcard $(PROJECT_DIR)/Kconfig))
 # Project dont have kconfig so give empty
@@ -79,20 +36,19 @@ $(DOTCONFIG_PATH):
 	$Q$(STDERR) Please run cmd_config
 	$Q$(EXIT) 1
 
-define kconfig_gen_config_rule
-$1: $(DOTCONFIG_PATH) | $(CACHE_DIR) $(KCONFIG_LANG_CONFIG_DIR)
-	$Q$(PRINT_STATUS) GEN_CONFIG 'Generating config file for $(suffix $1)'
-	$Q$(LUA) scripts/kconfig/gen_$(subst .,,$(suffix $1))_config.lua < $$< >$$@
-
-endef
-
-$(foreach config_file,$(KCONFIG_LANG_CONFIG_FILES),$(eval $(call kconfig_gen_config_rule,$(config_file))))
+$(KCONFIG_LANG_CONFIG_DIR)/%: $(DOTCONFIG_PATH) | $(CACHE_DIR) $(KCONFIG_LANG_CONFIG_DIR)
+	$Q$(PRINT_STATUS) GEN_CONFIG 'Generating config file for $(suffix $@)'
+	$Q$(LUA) scripts/kconfig/gen_$(subst .,,$(suffix $@))_config.lua < $< >$@
 
 $(KCONFIG_KNOBS_DIR)/knobs_dummy.txt: $(DOTCONFIG_PATH) | $(KCONFIG_KNOBS_DIR)
 	@$(PRINT_STATUS) UPDATE "Updating knobs"
 	$Q$(LUA) scripts/kconfig/update_knobs.lua
 	$Q$(STDOUT) "Content don't matter UwU only update time so make know when to do its thing UwU" > $@
 	$Q$(TOUCH) $@
+
+# Create new knob for nonexisting
+$(KCONFIG_KNOBS_DIR)/%:
+	$Q$(TOUCH) '$@'
 
 # If creating configuration or cleaning,
 # don't load config
@@ -108,9 +64,6 @@ kconfig_update_knobs: $(KCONFIG_KNOBS_DIR)/knobs_dummy.txt
 kconfig_gen_config_files: kconfig_update_knobs $(KCONFIG_LANG_CONFIG_FILES) 
 	$(NOP)
 
-# Create new knob for nonexisting
-$(KCONFIG_KNOBS_DIR)/%:
-	$Qtouch '$@'
 
 
 

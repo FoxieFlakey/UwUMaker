@@ -6,6 +6,7 @@ LANG_C_RULES			:= $(UwUMaker-c-sources-y:%.c=$(LANG_C_RULES_DIR)/%.d)
 
 LANG_OBJS					+= $(LANG_C_OBJS)
 LANG_OBJ_RULES		+= $(LANG_C_RULES)
+LANG_COMPILE_COMMAND_FRAGMENT_FILES += $(LANG_C_OBJS:%=%_compile_command.json)
 
 $(LANG_C_OBJS_DIR): $(LANG_OBJS_DIR) 
 	$Q$(MKDIR) $@
@@ -15,20 +16,17 @@ $(LANG_C_OBJS_DIR): $(LANG_OBJS_DIR)
 export UwUMaker-c-flags-y
 
 UwUMaker-c-flags-y += -I$(KCONFIG_LANG_CONFIG_DIR)/.. -I$(PROJECT_DIR)  
-define lang_c_compile
-$1: $2 $(KCONFIG_LANG_CONFIG_DIR)/kconfig_config.h | $(dir $2) $(LANG_C_OBJS_DIR) $(LANG_RULES_DIR) $(TEMP_DIR)
-	@$(PRINT_STATUS) CC "$(SUBDIR)/$(2:$(ABSOLUTE_SUBDIR)/%=%)"
 
+$(LANG_C_OBJS_DIR)/%.o: compile_flags = -c $< $(UwUMaker-c-flags-y) -MT $@ -MP -MMD -MF $(<:$(ABSOLUTE_SUBDIR)/%=$(LANG_RULES_DIR)/%.d) -o $@
+$(LANG_C_OBJS_DIR)/%.o: $(ABSOLUTE_SUBDIR)/%.c $(KCONFIG_LANG_CONFIG_DIR)/kconfig_config.h | $(LANG_C_OBJS_DIR) $(LANG_RULES_DIR) $(TEMP_DIR)
+	@$(PRINT_STATUS) CC "$(SUBDIR)/$(<:$(ABSOLUTE_SUBDIR)/%=%)"
 	@# Create dirs needed to place the outputs
-	$Q$(MKDIR) $(dir $1) $(dir $(2:$(ABSOLUTE_SUBDIR)/%=$(LANG_RULES_DIR)/%.d))
-	
-	$Q$(CC) -c $2 $(UwUMaker-c-flags-y) -MT $1 -MP -MMD -MF $(2:$(ABSOLUTE_SUBDIR)/%=$(LANG_RULES_DIR)/%.d) -o $1
+	$Q$(MKDIR) $(dir $@) $(dir $(<:$(ABSOLUTE_SUBDIR)/%=$(LANG_RULES_DIR)/%.d))	
+	$Q$(LUA) scripts/gen_compile_command_json_fragment.lua "$(BUILD_DIR)" "$<" "$@" "$(compile_flags)" > $(@:%=%_compile_command.json)
+	$Qcd $(BUILD_DIR) && $(CC) $(compile_flags)
 	$QCFLAGS="$(UwUMaker-c-flags-y)" $(SHELL) scripts/lang/c/gen_config_dep.sh "$2"
 
-endef
 
-# Create a recipe for compiling each source file
-$(foreach obj,$(LANG_C_OBJS),$(eval $(call lang_c_compile,$(obj),$(obj:$(LANG_C_OBJS_DIR)/%.o=$(ABSOLUTE_SUBDIR)/%.c))))
 
 
 

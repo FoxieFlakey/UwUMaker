@@ -47,6 +47,7 @@ function preprocOneFile(inputPath, outputPath)
   
   local inputDir = inputPath:gsub("[^/]-$", "")
   local outputDir = outputPath:gsub("[^/]-$", "")
+  assert(os.execute("$MKDIR '"..outputDir.."/'"))
 
   local current = {
     path = inputPath,
@@ -76,7 +77,6 @@ function preprocOneFile(inputPath, outputPath)
     local includePath = select(2, string.match(line, "^[ ]*source[ ]*([\"\'])(.-)%1"))
     if includePath then
       -- Gsub away file name part and create directory structure UwU
-      assert(os.execute("$MKDIR -p '"..outputDir.."/'"))
       preprocOneFile(inputDir.."/"..includePath, outputDir.."/"..includePath)
     end
 

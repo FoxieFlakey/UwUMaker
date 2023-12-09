@@ -7,20 +7,32 @@ UWUMAKER_MINOR_VERSION := 1
 UWUMAKER_PATCH_VERSION := 0
 UWUMAKER_EXTRA_VERSION := -dev
 
-UWUMAKER_VERSION := $(UWUMAKER_MAJOR_VERSION).$(UWUMAKER_MINOR_VERSION).$(UWUMAKER_PATCH_VERSION)$(UWUMAKER_EXTRA_VERSION)
+UWUMAKER_VERSION 	:= $(UWUMAKER_MAJOR_VERSION).$(UWUMAKER_MINOR_VERSION).$(UWUMAKER_PATCH_VERSION)$(UWUMAKER_EXTRA_VERSION)
+UWUMAKER_DIR			:= $(CURDIR)
 
 PROJECT_DIR ?= $(PROJECT_DIR)
 DOTCONFIG_PATH ?= $(PROJECT_DIR)/.config
 
-OLDDOTCONFIG_PATH	:= $(DOTCONFIG_PATH).old
-
+# Build dir where miscellanous stuff located
 BUILD_DIR		?= $(PROJECT_DIR)/build
-TEMP_DIR		?= $(BUILD_DIR)/temp
-OBJS_DIR		?= $(BUILD_DIR)/objs
-CACHE_DIR		?= $(BUILD_DIR)/cache
+
+# Temporary directory (filled by boot Makefile)
+TEMP_DIR		:= $(TEMP_DIR)
+
+# This can be deleted with only caveat slower or
+# trigger regeneration of resources (or recompilation)
+# don't cherry pick what to delete unless you know
+# what do you do
+CACHE_DIR		:= $(BUILD_DIR)/cache
+
+# Contain compiled files (like .o, .a, .so, etc)
+OBJS_DIR		:= $(BUILD_DIR)/objs
 
 SHELL       ?= $(shell which dash)
 LUA					?= $(shell which lua5.4)
+
+LUA_PATH		:= $(shell $(LUA) scripts/gen_lua_path.lua '$(shell pwd)')
+LUA_CPATH		:= $(shell $(LUA) scripts/gen_lua_cpath.lua '$(shell pwd)')
 
 # Prefixes #
 V ?= 0
@@ -65,9 +77,16 @@ NOP						:= @:
 include makefiles/kconfig.mak
 include makefiles/directories.mak
 
-.PHONY: cmd_all
-cmd_all: kconfig_gen_config_files | $(OBJS_DIR) $(TEMP_DIR)
+do_all: kconfig_gen_config_files | $(OBJS_DIR) $(TEMP_DIR)
 	$Q$(MAKE) -f makefiles/subdir.mak cmd_all
+
+.PHONY: cmd_all
+cmd_all: do_all .WAIT $(BUILD_DIR)/compile_commands.json
+	$(NOP)
+
+# Generating compile_commands.json
+$(BUILD_DIR)/compile_commands.json: $(OBJS_DIR)/compile_commands.json
+	$Q$(COPY) $< $@
 
 .PHONY: cmd_clean
 clean_subdir:
@@ -84,8 +103,10 @@ cmd_clean_cache: | $(CACHE_DIR)
 
 # Deletes everything in $(BUILD_DIR)
 .PHONY: cmd_sanitize
-cmd_sanitize: | $(BUILD_DIR)
-	$Q$(PRINT_STATUS) RM "Deleting build dir"
+cmd_sanitize: cmd_clean_cache
+	$Q$(PRINT_STATUS) RM "Deleting $(OBJS_DIR) dir"
+	-$Q$(RMDIR) -f $(OBJS_DIR)
+	$Q$(PRINT_STATUS) RM "Deleting $(BUILD_DIR) dir"
 	-$Q$(RMDIR) -f $(BUILD_DIR)
 
 

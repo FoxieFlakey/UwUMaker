@@ -1,5 +1,5 @@
 # Initial makefile to chain call
-# to real makefiles/MainUwUMaker.mak
+# to real MainUwUMaker.mak
 
 MAKEFLAGS += --no-print-directory -rR
 
@@ -23,14 +23,22 @@ else
 GOALS_TO_RUN = $(strip $(MAKECMDGOALS))
 endif
 
-define task_rule
+ifndef TEMP_DIR
+TEMP_DIR := $(shell mktemp -d)
+TEMP_DIR_GENERATED := y
+unexport TEMP_DIR_GENERATED
+endif
+
+# Todo find a way to rm tmp dir
 .EXPORT_ALL_VARIABLES:
 .NOTPARALLEL:
-.PHONY: $1
-$1:
-	@$(MAKE) -f UwUMakerMain.mak PROJECT_DIR="$(ABS_PROJECT_DIR)" $1
-endef
+.PHONY: %
+%:
+ifdef TEMP_DIR_GENERATED
+	@trap 'rm -rf "$(TEMP_DIR)"' EXIT;	\
+	$(MAKE) -f UwUMakerMain.mak PROJECT_DIR="$(ABS_PROJECT_DIR)" $@
+else
+	@$(MAKE) -f UwUMakerMain.mak PROJECT_DIR="$(ABS_PROJECT_DIR)" $@
+endif
 
-# Create individual tasks
-$(foreach goal, $(GOALS_TO_RUN), $(eval $(call task_rule,$(goal))))
 
