@@ -22,7 +22,7 @@ $(LANG_C_OBJS_DIR)/%.o: $(ABSOLUTE_SUBDIR)/%.c $(KCONFIG_LANG_CONFIG_DIR)/kconfi
 	@$(PRINT_STATUS) CC "$(SUBDIR)/$(<:$(ABSOLUTE_SUBDIR)/%=%)"
 	@# Create dirs needed to place the outputs
 	$Q$(MKDIR) $(dir $@) $(dir $(<:$(ABSOLUTE_SUBDIR)/%=$(LANG_RULES_DIR)/%.d))	
-	$Q$(LUA) scripts/gen_compile_command_json_fragment.lua "$(BUILD_DIR)" "$<" "$@" "$(compile_flags)" > $(@:%=%_compile_command.json)
+	$Q$(LUA) scripts/gen_compile_command_json_fragment.lua "$(BUILD_DIR)" "$<" "$@" "$(CC) $(compile_flags)" > $(@:%=%_compile_command.json)
 	$Qcd $(BUILD_DIR) && $(CC) $(compile_flags)
 	$QCFLAGS="$(UwUMaker-c-flags-y)" $(SHELL) scripts/lang/c/gen_config_dep.sh "$2"
 
