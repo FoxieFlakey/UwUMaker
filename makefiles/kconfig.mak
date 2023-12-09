@@ -7,6 +7,15 @@ KCONFIG_LANG_CONFIG_DIR	:= $(CACHE_DIR)/config/generated
 KCONFIG_LANG_CONFIG_FILES	:= $(foreach lang,$(KCONFIG_LANGS),$(KCONFIG_LANG_CONFIG_DIR)/kconfig_config.$(lang))
 KCONFIG_PREPROCESSED_DIR	:= $(TEMP_DIR)/kconfig_preproc
 
+include makefiles/kconfig/frontends.mak
+
+.PHONY: cmd_kconfig_clean
+cmd_kconfig_clean: | $(CACHE_DIR)
+	@$(PRINT_STATUS) CLEAN "Deleting config files for all languages"
+	-$Q$(RM) -f $(KCONFIG_LANG_CONFIG_FILES)
+	@$(PRINT_STATUS) CLEAN "Deleting knobs"
+	-$Q$(RM) -f $(KCONFIG_KNOBS_DIR)/CONFIG_*
+
 $(KCONFIG_LANG_CONFIG_DIR): $(CACHE_DIR)
 	$Q$(MKDIR) $@
 
