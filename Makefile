@@ -3,12 +3,15 @@
 
 MAKEFLAGS += --no-print-directory -rR
 
+# TODO: fix all undefined var usage and add this
+#--warn-undefined-variables 
+
 ifndef PROJECT_DIR
   $(error "Please pass PROJECT_DIR")
 endif
 
 ifneq (1,$(words [$(PROJECT_DIR)]))
-	$(error "Please put PROJECT_DIR in path without spaces (there some little bugs about path with spaces -w-")
+	$(error "Please put PROJECT_DIR in path without spaces (there some little bugs about path with spaces -w- its currently broken")
 endif
 
 ifneq ($(PROJECT_DIR),$(abspath $(PROJECT_DIR)))
@@ -26,19 +29,42 @@ endif
 ifndef TEMP_DIR
 TEMP_DIR := $(shell mktemp -d)
 TEMP_DIR_GENERATED := y
-unexport TEMP_DIR_GENERATED
 endif
 
-# Todo find a way to rm tmp dir
+$(TEMP_DIR):
+	@mkdir -p "$@"
+
+# Shell no-op
+NOP := @:
+
+.PHONY: alt_phony
+alt_phony:
+	$(NOP)
+
+# Apparently make trigger Makefile target???
+Makefile:
+	$(NOP)
+
+unexport TEMP_DIR_GENERATED
+unexport ABS_PROJECT_DIR
+unexport GOALS_TO_RUN
+unexport NOP
+
+# Do not pass command line overrides
+# use env for the rest of make
+MAKEOVERRIDES :=
+
+# Properly delete in exit
 .EXPORT_ALL_VARIABLES:
 .NOTPARALLEL:
-.PHONY: %
-%:
+cmd_%: PROJECT_DIR := $(ABS_PROJECT_DIR)
+cmd_%: alt_phony
 ifdef TEMP_DIR_GENERATED
-	@trap 'rm -rf "$(TEMP_DIR)"' EXIT;	\
-	$(MAKE) -f UwUMakerMain.mak PROJECT_DIR="$(ABS_PROJECT_DIR)" $@
+	@trap 'rm -rf $(TEMP_DIR)' EXIT; \
+	$(MAKE) -ef UwUMakerMain.mak $@
 else
-	@$(MAKE) -f UwUMakerMain.mak PROJECT_DIR="$(ABS_PROJECT_DIR)" $@
+	@$(MAKE) -ef UwUMakerMain.mak $@
 endif
+
 
 

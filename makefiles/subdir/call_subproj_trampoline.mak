@@ -1,0 +1,42 @@
+# Calling subproject should have env clean
+# and not polluted by current make instance
+
+# Unexport everything
+unexport BUILD_SUBDIR
+unexport LANG_RULES_DIR
+unexport OBJS_DIR
+unexport SUBDIR
+unexport PROJECT_NAME
+unexport FINAL_PRODUCT_TYPE
+unexport FINAL_PRODUCT
+unexport
+
+$(SUBPROJECT_CACHE_DIR):
+	$Q$(MKDIR) $@
+
+.PHONY: alt_phony
+alt_phony:
+	$(NOP)
+
+# Trampoline need these vars set
+# SUBPROJECT
+# SUBPROJECT_CACHE_DIR
+# SUBPROJECT_SHARED_CACHE_DIR
+# SUBPROJECT_LANG_RULES_DIR
+# SUBPROJECT_DOTCONFIG_PATH
+# SUBPROJECT_BUILD_DIR
+# SUBPROJECT_DIR
+
+$(MAKECMDGOALS): export SHARED_CACHE_DIR := $(SUBPROJECT_SHARED_CACHE_DIR)
+$(MAKECMDGOALS): export CACHE_DIR := $(SUBPROJECT_CACHE_DIR)
+$(MAKECMDGOALS): export BUILD_DIR := $(SUBPROJECT_BUILD_DIR)
+$(MAKECMDGOALS): export LANG_RULES_DIR := $(SUBPROJECT_LANG_RULES_DIR)
+$(MAKECMDGOALS): export PROJECT_DIR := $(SUBPROJECT_DIR)
+$(MAKECMDGOALS): alt_phony | $(SUBPROJECT_CACHE_DIR)
+	$Qmake -C $(UWUMAKER_DIR) $@
+
+
+
+
+
+

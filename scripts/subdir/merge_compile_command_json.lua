@@ -1,5 +1,5 @@
 #!/usr/bin/env lua5.4
-local JSON = require("lua.json")
+local JSON<const> = require("lua.json")
 
 if #arg == 0 then
   print("[]")

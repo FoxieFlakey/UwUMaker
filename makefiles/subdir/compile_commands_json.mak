@@ -3,5 +3,5 @@
 
 # compile_commands.json in each subdir
 $(BUILD_SUBDIR)/compile_commands.json: $(COMPILE_COMMAND_FILES)
-	$Q$(LUA) scripts/gen_compile_command_json.lua $^ > $@
+	$Q$(LUA) scripts/subdir/merge_compile_command_json.lua $^ > $@
 

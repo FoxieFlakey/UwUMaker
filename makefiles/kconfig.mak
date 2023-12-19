@@ -2,27 +2,30 @@
 
 # Create config file for corresponding language
 KCONFIG_LANGS := lua h sh rs
-KCONFIG_KNOBS_DIR	:= $(CACHE_DIR)/knobs
-KCONFIG_LANG_CONFIG_DIR	:= $(CACHE_DIR)/config/generated
+KCONFIG_KNOBS_DIR	:= $(SHARED_CACHE_DIR)/knobs
+KCONFIG_LANG_CONFIG_DIR	:= $(SHARED_CACHE_DIR)/config/generated
 KCONFIG_LANG_CONFIG_FILES	:= $(foreach lang,$(KCONFIG_LANGS),$(KCONFIG_LANG_CONFIG_DIR)/kconfig_config.$(lang))
 KCONFIG_PREPROCESSED_DIR	:= $(TEMP_DIR)/kconfig_preproc
 
 include makefiles/kconfig/frontends.mak
 
 .PHONY: cmd_kconfig_clean
-cmd_kconfig_clean: | $(CACHE_DIR)
+cmd_kconfig_clean: | $(SHARED_CACHE_DIR)
+	$(NOP)
+ifeq (/,$(SUBPROJECT))
 	@$(PRINT_STATUS) CLEAN "Deleting config files for all languages"
-	-$Q$(RM) -f $(KCONFIG_LANG_CONFIG_FILES)
+	-$Q$(RM) -f -- $(KCONFIG_LANG_CONFIG_FILES)
 	@$(PRINT_STATUS) CLEAN "Deleting knobs"
-	-$Q$(RM) -f $(KCONFIG_KNOBS_DIR)/CONFIG_*
+	-$Q$(RM) -f -- $(KCONFIG_KNOBS_DIR)/CONFIG_*
+endif
 
-$(KCONFIG_LANG_CONFIG_DIR): $(CACHE_DIR)
+$(KCONFIG_LANG_CONFIG_DIR): | $(SHARED_CACHE_DIR)
 	$Q$(MKDIR) $@
 
-$(KCONFIG_KNOBS_DIR): $(CACHE_DIR)
+$(KCONFIG_KNOBS_DIR): | $(SHARED_CACHE_DIR)
 	$Q$(MKDIR) $@
 
-$(KCONFIG_PREPROCESSED_DIR): $(TEMP_DIR)
+$(KCONFIG_PREPROCESSED_DIR): | $(TEMP_DIR)
 	$Q$(MKDIR) $@
 
 .PHONY: $(TEMP_DIR)/Kconfig
@@ -45,10 +48,11 @@ $(DOTCONFIG_PATH):
 	$Q$(STDERR) Please run cmd_config
 	$Q$(EXIT) 1
 
-$(KCONFIG_LANG_CONFIG_DIR)/%: $(DOTCONFIG_PATH) | $(CACHE_DIR) $(KCONFIG_LANG_CONFIG_DIR)
+$(KCONFIG_LANG_CONFIG_DIR)/%: $(DOTCONFIG_PATH) | $(SHARED_CACHE_DIR) $(KCONFIG_LANG_CONFIG_DIR)
 	$Q$(PRINT_STATUS) GEN_CONFIG 'Generating config file for $(suffix $@)'
 	$Q$(LUA) scripts/kconfig/gen_$(subst .,,$(suffix $@))_config.lua < $< >$@
 
+$(KCONFIG_KNOBS_DIR)/knobs_dummy.txt: export KCONFIG_KNOBS_DIR := $(KCONFIG_KNOBS_DIR)
 $(KCONFIG_KNOBS_DIR)/knobs_dummy.txt: $(DOTCONFIG_PATH) | $(KCONFIG_KNOBS_DIR)
 	@$(PRINT_STATUS) UPDATE "Updating knobs"
 	$Q$(LUA) scripts/kconfig/update_knobs.lua
@@ -56,12 +60,11 @@ $(KCONFIG_KNOBS_DIR)/knobs_dummy.txt: $(DOTCONFIG_PATH) | $(KCONFIG_KNOBS_DIR)
 	$Q$(TOUCH) $@
 
 # Create new knob for nonexisting
-$(KCONFIG_KNOBS_DIR)/%:
+$(KCONFIG_KNOBS_DIR)/CONFIG_%:
 	$Q$(TOUCH) '$@'
 
-# If creating configuration or cleaning,
-# don't load config
-ifeq (,$(filter cmd_menuconfig cmd_config cmd_clean,$(MAKECMDGOALS)))
+# If creating configuration,bdon't load config
+ifeq (,$(filter cmd_menuconfig cmd_config,$(MAKECMDGOALS)))
 include $(DOTCONFIG_PATH)
 endif
 
@@ -72,6 +75,10 @@ kconfig_update_knobs: $(KCONFIG_KNOBS_DIR)/knobs_dummy.txt
 .PHONY: kconfig_gen_config_files
 kconfig_gen_config_files: kconfig_update_knobs $(KCONFIG_LANG_CONFIG_FILES) 
 	$(NOP)
+
+# Export CONFIG_*
+export dummy $(filter CONFIG_%,$(.VARIABLES))
+unexport dummy
 
 
 

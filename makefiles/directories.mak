@@ -9,6 +9,6 @@ $(TEMP_DIR):
 $(CACHE_DIR):
 	$Q$(MKDIR) $@
 
-$(OBJS_DIR):
+$(OBJS_DIR): | $(BUILD_DIR)
 	$Q$(MKDIR) $@
 

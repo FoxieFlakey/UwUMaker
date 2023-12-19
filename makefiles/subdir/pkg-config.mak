@@ -1,6 +1,5 @@
 # Pkg config support
 
-
 ifdef IS_TOPDIR
 ifneq (0,$(words $(UwUMaker-pkg-config-libs-y)))
 UwUMaker-c-flags-y += $(shell pkg-config --cflags $(UwUMaker-pkg-config-libs-y))

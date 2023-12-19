@@ -22,7 +22,7 @@ function processOneLine(line)
     return
   end
 
-  local name, value = line:match("^([^=]+)=(.+)$")
+  local name, value = line:match("^([^=]-)=(.*)$")
   if not name then
     return
   end

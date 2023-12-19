@@ -6,7 +6,7 @@ function processOneLine(line)
     return
   end
   
-  if not line:match("^(^=)-)=.*$") then
+  if not line:match("^[^=]-=.*$") then
     return
   end
 
