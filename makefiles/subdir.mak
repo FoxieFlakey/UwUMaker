@@ -17,7 +17,7 @@ include makefiles/langs/flags_export.mak
 
 define fix_var
 ___TMP_FIX_VAR := $$($1)
-override undefine UwUMaker-c-flags-y
+override undefine $1
 $1 := $$(___TMP_FIX_VAR)
 
 endef
@@ -73,11 +73,11 @@ include makefiles/subdir/subproject.mak
 include makefiles/subdir/compile_commands_json.mak
 
 SUBDIRS								:= $(UwUMaker-dirs-y:%=$(ABSOLUTE_SUBDIR)/%)
-SUBDIR_ARCHIVES				:= $(UwUMaker-dirs-y:%=$(BUILD_SUBDIR)/%/built_in.o)
+SUBDIR_ARCHIVES				:= $(UwUMaker-dirs-y:%=$(BUILD_SUBDIR)/%/built_in.a)
 SUBDIR_LINK_RULES			:= $(SUBDIRS:$(ABSOLUTE_SUBDIR)/%=$(BUILD_SUBDIR)/%/link_rules.mak)
 BUILD_NO_DIR_OBJS 		:= $(LANG_OBJS) 
 BUILD_OBJECTS 				:= $(SUBDIR_ARCHIVES) $(BUILD_NO_DIR_OBJS) 
-ARCHIVE_NAME					:= $(BUILD_SUBDIR)/built_in.o
+ARCHIVE_NAME					:= $(BUILD_SUBDIR)/built_in.a
 
 # Include rules for making link rules
 include makefiles/subdir/gen_link_rules_mak.mak
@@ -111,8 +111,13 @@ call_subdirs: $(SUBDIRS:%=/phonified_subdir/%)
 
 # Group objects into one UwU
 $(ARCHIVE_NAME): $(BUILD_OBJECTS) | $(BUILD_SUBDIR)
-	@$(PRINT_STATUS) LD "Partial linking '$(@:$(OBJS_DIR)%=%)'"
-	$Q$(CC) -r $^ -o $@
+	@$(PRINT_STATUS) AR "Archiving '$(@:$(OBJS_DIR)%=%)'"
+	@# Make sure ar recreates
+	$Q$(RM) -f -- $@
+	$Q$(AR) --thin rcsP $@ $^
+#	@$(PRINT_STATUS) LD "Partial linking '$(@:$(OBJS_DIR)%=%)'"
+#	$Q$(LD) -r $^ -o $@
+#	$Q$(OBJCOPY) --localize-hidden $@
 
 .PHONY: clean_self
 clean_self:

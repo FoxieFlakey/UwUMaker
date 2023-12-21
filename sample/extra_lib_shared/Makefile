@@ -2,7 +2,7 @@
 # Only shares same .config
 
 UwUMaker-dirs-y += lib
-UwUMaker-c-flags-y += -fvisibility=hidden
+UwUMaker-c-flags-y += -fvisibility=hidden -fPIC -fPIE
 
 UwUMaker-is-executable := m
 

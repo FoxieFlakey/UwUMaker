@@ -83,20 +83,19 @@ end
 -- these types
 function link_executable()
   appendOutput("\t$Q$(PRINT_STATUS) LD 'Linking $(@:$(abspath "..OBJS_DIR..")%=%)'\n")
-	appendOutput("\t$Q"..os.getenv("CC").." "..ARCHIVE_NAME.." "..LINK_FLAGS.." -o $@\n")
+	appendOutput("\t$Q"..os.getenv("AR").." t "..ARCHIVE_NAME.." | xargs "..os.getenv("CC").." "..LINK_FLAGS.." -o $@\n")
 end
 
 function link_shared_lib()
   appendOutput("\t$Q$(PRINT_STATUS) LD 'Linking $(@:$(abspath "..OBJS_DIR..")%=%)'\n")
-	appendOutput("\t$Q"..os.getenv("CC").." -shared "..ARCHIVE_NAME.." "..LINK_FLAGS.." -shared -o $@\n")
+	--appendOutput("\t$Q"..os.getenv("LD").." --whole-archive "..LINK_FLAGS.." -shared "..ARCHIVE_NAME.." -o $@\n")
+  appendOutput("\t$Q"..os.getenv("AR").." t "..ARCHIVE_NAME.." | xargs "..os.getenv("CC").." "..LINK_FLAGS.." -shared -o $@\n")
 end
 
 function link_archive()
-  appendOutput("\t$Q$(PRINT_STATUS) LD 'Linking lib.o'\n")
-	appendOutput("\t$Q"..os.getenv("CC").." -r "..ARCHIVE_NAME.." "..LINK_FLAGS.." -o "..OBJS_DIR.."/lib.o\n")
   appendOutput("\t$Q$(PRINT_STATUS) AR 'Archiving $(@:$(abspath "..OBJS_DIR..")%=%)'\n")
-  appendOutput("\t$Q$(RM) -f -- "..OBJS_DIR.."/lib.a\n")
-	appendOutput("\t$Q"..os.getenv("AR").." rcsP $@ "..OBJS_DIR.."/lib.o\n")
+  appendOutput("\t$Q$(RM) -f -- $@\n")
+	appendOutput("\t$Q"..os.getenv("AR").." t "..ARCHIVE_NAME.." | xargs "..os.getenv("AR").." rcsP $@ \n")
   appendOutput("\t$Q$(PRINT_STATUS) OBJCOPY 'Hiding symbols of $(@:$(abspath "..OBJS_DIR..")%=%)'\n")
 	appendOutput("\t$Q"..os.getenv("OBJCOPY").." --localize-hidden $@\n")
 end
@@ -116,8 +115,9 @@ end)
 appendOutput("#### Compile command files appending\n")
 appendOutput("COMPILE_COMMANDS_FILES += "..COMPILE_COMMANDS_FILES.."\n")
 
-appendOutput("#### Check project rule\n")
-appendOutput("/check_self/"..LINK_OUTPUT..": "..subProjectCheckSelfDeps.."\n")
+appendOutput("#### Check project rule deps (the actual check shown as additional /do_check_self/% is there to allow parallelization)\n")
+appendOutput(".PHONY: /check_self/"..LINK_OUTPUT.."\n")
+appendOutput("/check_self/"..LINK_OUTPUT..": "..subProjectCheckSelfDeps.." /do_check_self/"..LINK_OUTPUT.."\n")
 
 -- Only top subdir can generate link output
 if IS_TOP_SUBDIR then
@@ -134,16 +134,19 @@ if IS_TOP_SUBDIR then
     error("Unknown type "..OUTPUT_TYPE)
   end
 
-  appendOutput("#### Check project rule\n")
-  appendOutput(".PHONY: /check_self/"..LINK_OUTPUT.."\n")
-  appendOutput("/check_self/"..LINK_OUTPUT..": export SUBPROJECT := "..os.getenv("SUBPROJECT").."\n")
-  appendOutput("/check_self/"..LINK_OUTPUT..": export SUBPROJECT_SHARED_CACHE_DIR := "..os.getenv("SHARED_CACHE_DIR").."\n")
-  appendOutput("/check_self/"..LINK_OUTPUT..": export SUBPROJECT_CACHE_DIR := "..os.getenv("CACHE_DIR").."\n")
-  appendOutput("/check_self/"..LINK_OUTPUT..": export SUBPROJECT_LANG_RULES_DIR := "..os.getenv("LANG_RULES_DIR").."\n")
-  appendOutput("/check_self/"..LINK_OUTPUT..": export SUBPROJECT_DOTCONFIG_PATH := "..os.getenv("DOTCONFIG_PATH").."\n")
-  appendOutput("/check_self/"..LINK_OUTPUT..": export SUBPROJECT_BUILD_DIR := "..os.getenv("BUILD_DIR").."\n")
-  appendOutput("/check_self/"..LINK_OUTPUT..": export SUBPROJECT_DIR := "..os.getenv("PROJECT_DIR").."\n")
-  appendOutput("/check_self/"..LINK_OUTPUT..": \n")
+  appendOutput("#### Actually do the project check rule\n")
+  appendOutput("#### If subproject compilation depends on another\n")
+  appendOutput("#### subproject like compile e.g. compile a header\n")
+  appendOutput("#### generator or source gen add to this deps \n")
+  appendOutput(".PHONY: /do_check_self/"..LINK_OUTPUT.."\n")
+  appendOutput("/do_check_self/"..LINK_OUTPUT..": export SUBPROJECT := "..os.getenv("SUBPROJECT").."\n")
+  appendOutput("/do_check_self/"..LINK_OUTPUT..": export SUBPROJECT_SHARED_CACHE_DIR := "..os.getenv("SHARED_CACHE_DIR").."\n")
+  appendOutput("/do_check_self/"..LINK_OUTPUT..": export SUBPROJECT_CACHE_DIR := "..os.getenv("CACHE_DIR").."\n")
+  appendOutput("/do_check_self/"..LINK_OUTPUT..": export SUBPROJECT_LANG_RULES_DIR := "..os.getenv("LANG_RULES_DIR").."\n")
+  appendOutput("/do_check_self/"..LINK_OUTPUT..": export SUBPROJECT_DOTCONFIG_PATH := "..os.getenv("DOTCONFIG_PATH").."\n")
+  appendOutput("/do_check_self/"..LINK_OUTPUT..": export SUBPROJECT_BUILD_DIR := "..os.getenv("BUILD_DIR").."\n")
+  appendOutput("/do_check_self/"..LINK_OUTPUT..": export SUBPROJECT_DIR := "..os.getenv("PROJECT_DIR").."\n")
+  appendOutput("/do_check_self/"..LINK_OUTPUT..": \n")
   appendOutput("\t$Q$(MAKE) -f makefiles/subdir/call_subproj_trampoline.mak cmd_compile_project\n")
 
   appendOutput("#### Compile command.json rule\n")

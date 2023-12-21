@@ -23,6 +23,16 @@ function processOneLine(line)
   if not name then
     return
   end
+  local name, value = line:match("^([^=]-)=(.*)$")
+  if not name then
+    return
+  end
+  if value == "y" then
+    value = "true"
+  elseif value == "n" or value == "m" then
+    error("Shouldn't occur")
+  end
+
   print(("    [%q] = %s,"):format(name, value))
 end
 

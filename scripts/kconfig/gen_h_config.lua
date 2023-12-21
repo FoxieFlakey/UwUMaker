@@ -10,8 +10,18 @@ function processOneLine(line)
     return
   end
 
+  local name, value = line:match("^([^=]-)=(.*)$")
+  if not name then
+    return
+  end
+  if value == "y" then
+    value = "1"
+  elseif value == "n" or value == "m" then
+    error("Shouldn't occur")
+  end
+
   io.write("#define ")
-  io.write((line:gsub("^([^=]-)=", "%1 ")))
+  io.write(name.." "..value)
   print()
 end
 

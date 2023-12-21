@@ -1,7 +1,7 @@
 # Configuration management
 
 # Create config file for corresponding language
-KCONFIG_LANGS := lua h sh rs
+KCONFIG_LANGS := lua h sh
 KCONFIG_KNOBS_DIR	:= $(SHARED_CACHE_DIR)/knobs
 KCONFIG_LANG_CONFIG_DIR	:= $(SHARED_CACHE_DIR)/config/generated
 KCONFIG_LANG_CONFIG_FILES	:= $(foreach lang,$(KCONFIG_LANGS),$(KCONFIG_LANG_CONFIG_DIR)/kconfig_config.$(lang))
