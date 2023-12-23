@@ -11,8 +11,6 @@ local fragment = {
   file = arg[2],
   output = arg[3],
   command = arg[4],
-
-  hello = "Hello there :3"
 }
 
 print(JSON.encode(fragment))
