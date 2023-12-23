@@ -1,8 +1,9 @@
-cmd_%config: export KCONFIG_CONFIG=$(DOTCONFIG_PATH)
-
 # Foxie still doesnt know what the purpose
 # of SRCTREE to kconfig
 # SRCTREE=$(PROJECT_DIR)
+
+cmd_%config: export KCONFIG_CONFIG := $(DOTCONFIG_PATH)
+cmd_config: export KCONFIG_CONFIG := $(DOTCONFIG_PATH)
 
 .PHONY: cmd_menuconfig
 cmd_menuconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig | $(KCONFIG_PREPROCESSED_DIR)
@@ -10,11 +11,11 @@ cmd_menuconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig | $(KCONFIG_PREPROCESSED_DIR
 
 .PHONY: cmd_config
 cmd_config: $(KCONFIG_PREPROCESSED_DIR)/Kconfig | $(KCONFIG_PREPROCESSED_DIR)
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && kconfig-conf $<
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && kconfig-conf --oldaskconfig $<
 
 .PHONY: cmd_oldconfig
 cmd_oldconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig | $(KCONFIG_PREPROCESSED_DIR)
-	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && kconfig-conf --oldaskconfig $<
+	$(Q)cd $(KCONFIG_PREPROCESSED_DIR) && kconfig-conf --oldconfig $<
 
 .PHONY: cmd_olddefconfig
 cmd_olddefconfig: $(KCONFIG_PREPROCESSED_DIR)/Kconfig | $(KCONFIG_PREPROCESSED_DIR)
