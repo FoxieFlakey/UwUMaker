@@ -28,7 +28,7 @@ $(KCONFIG_KNOBS_DIR): | $(SHARED_CACHE_DIR)
 $(KCONFIG_PREPROCESSED_DIR): | $(TEMP_DIR)
 	$Q$(MKDIR) $@
 
-.PHONY: $(TEMP_DIR)/Kconfig
+.PHONY: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
 ifeq (,$(wildcard $(PROJECT_DIR)/Kconfig))
 # Project dont have kconfig so give empty
 $(KCONFIG_PREPROCESSED_DIR)/Kconfig: | $(KCONFIG_PREPROCESSED_DIR)
@@ -37,11 +37,9 @@ $(KCONFIG_PREPROCESSED_DIR)/Kconfig: | $(KCONFIG_PREPROCESSED_DIR)
 else
 # Phony because preprocessing also calls to
 # shell which may provide different output
-.PHONY: $(KCONFIG_PREPROCESSED_DIR)/Kconfig
 $(KCONFIG_PREPROCESSED_DIR)/Kconfig: $(PROJECT_DIR)/Kconfig | $(KCONFIG_PREPROCESSED_DIR)
 	@$(PRINT_STATUS) PREPROC "Preprocessing $<"
-	$Q$(LUA) scripts/kconfig/preprocess.lua "$(PROJECT_DIR)" "$(KCONFIG_PREPROCESSED_DIR)"
-
+	$Qcd $(PROJECT_DIR) && $(LUA) $(UWUMAKER_DIR)/scripts/kconfig/preprocess.lua "$(PROJECT_DIR)" "$(KCONFIG_PREPROCESSED_DIR)"
 endif
 
 $(DOTCONFIG_PATH):

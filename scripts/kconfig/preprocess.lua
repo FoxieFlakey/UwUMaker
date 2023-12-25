@@ -33,7 +33,9 @@ function doSubst(str)
     -- Do the substitution
     local handle<close> = assert(io.popen(content))
     local res = assert(handle:read("*a"))
-    assert(handle:close())
+    if not handle:close() then
+      quitWithError("Error executing shell command")
+    end
     return res:gsub("([^\n])[\n]?$", "%1")
   end)
   substDepth = substDepth - 1
@@ -82,6 +84,8 @@ function preprocOneFile(inputPath, outputPath)
 
     current.line = current.line + 1
   end
+
+  table.remove(includeStack)
 end
 
 -- Start preprocessing
