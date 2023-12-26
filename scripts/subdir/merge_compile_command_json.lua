@@ -12,13 +12,14 @@ for _, file in ipairs(arg) do
   local file<close> = assert(io.open(file))
   local data = JSON.decode(file:read("*a"))
   file:close()
-  
+
   if #data > 0 then
     -- Its array
     for _, entry in ipairs(data) do
       table.insert(final, entry)
     end
-  else
+  -- If data not empty
+  elseif next(data) then
     table.insert(final, data)
   end
 end
