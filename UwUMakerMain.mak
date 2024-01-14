@@ -2,7 +2,7 @@
 
 # Version of the buildsystem
 export UWUMAKER_MAJOR_VERSION := 1
-export UWUMAKER_MINOR_VERSION := 0
+export UWUMAKER_MINOR_VERSION := 1
 export UWUMAKER_PATCH_VERSION := 0
 export UWUMAKER_EXTRA_VERSION := 
 
