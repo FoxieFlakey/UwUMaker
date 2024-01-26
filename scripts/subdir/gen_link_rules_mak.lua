@@ -13,6 +13,7 @@ end
 function genIncludes(outputNamePaths)
   local includes = ""
   for outputNamePath in outputNamePaths:gmatch("[^ ]+") do
+    -- Replace basename with link_rules.mak
     local linkRulesPath = outputNamePath:match("^(.-)/[^/]+$").."/link_rules.mak"
     includes = includes.." "..linkRulesPath
   end

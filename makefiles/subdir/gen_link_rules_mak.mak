@@ -2,15 +2,7 @@
 # which drives the overall linking process
 # which indirectly drives compilation
 
-ifdef IS_TOPDIR
-ifeq (/,$(SUBPROJECT))
-LINK_RULES_FILE := $(OBJS_DIR)/link_rules.mak
-else
-LINK_RULES_FILE := $(BUILD_DIR)/link_rules.mak
-endif
-else
 LINK_RULES_FILE := $(BUILD_SUBDIR)/link_rules.mak
-endif
 
 # TODO: Somehow properly tell to update
 # via make prereq

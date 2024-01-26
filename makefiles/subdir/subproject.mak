@@ -15,9 +15,18 @@ $(eval $(call process_paths,UwUMaker-static-lib-subprojects-y,STATIC_LIB_SUBPROJ
 $(eval $(call process_paths,UwUMaker-shared-lib-subprojects-y,SHARED_LIB_SUBPROJECTS))
 
 # List of subprojects' outputs
-ALWAYS_OBJECTS := $(ALWAYS_SUBPROJECTS:$(ROOT_PROJECT_DIR)%=$(ROOT_OBJS_DIR)%/output_path.txt)
-STATIC_LINK_OBJECTS := $(STATIC_LIB_SUBPROJECTS:$(ROOT_PROJECT_DIR)%=$(ROOT_OBJS_DIR)%/output_path.txt)
-DYNAMIC_LINK_OBJECTS := $(SHARED_LIB_SUBPROJECTS:$(ROOT_PROJECT_DIR)%=$(ROOT_OBJS_DIR)%/output_path.txt)
+ALWAYS_OBJECTS := $(ALWAYS_SUBPROJECTS:$(ROOT_PROJECT_DIR)%=$(ROOT_OBJS_DIR)%/objs/output_path.txt)
+STATIC_LINK_OBJECTS := $(STATIC_LIB_SUBPROJECTS:$(ROOT_PROJECT_DIR)%=$(ROOT_OBJS_DIR)%/objs/output_path.txt)
+DYNAMIC_LINK_OBJECTS := $(SHARED_LIB_SUBPROJECTS:$(ROOT_PROJECT_DIR)%=$(ROOT_OBJS_DIR)%/objs/output_path.txt)
+
+# Replace <build dir>/objs/objs/output_path.txt to <build dir>/objs/output_path.txt
+define fix_root_project_paths
+$1 := $$(foreach v,$$($1), $$(if $$(filter $(ROOT_OBJS_DIR)/objs/output_path.txt,$$v),$$(v:$(ROOT_OBJS_DIR)/objs/%=$(ROOT_OBJS_DIR)/%),$$v))
+endef
+
+$(eval $(call fix_root_project_paths,ALWAYS_OBJECTS))
+$(eval $(call fix_root_project_paths,STATIC_LINK_OBJECTS))
+$(eval $(call fix_root_project_paths,DYNAMIC_LINK_OBJECTS))
 
 # Add this as prereq and make will execute
 .PHONY: alt_phony

@@ -130,13 +130,8 @@ endif
 
 
 ifdef IS_TOPDIR
-ifeq (/,$(SUBPROJECT))
 OUTPUT_PATH_TXT := $(OBJS_DIR)/output_path.txt
 $(OBJS_DIR)/output_path.txt: | $(OBJS_DIR)
-else
-OUTPUT_PATH_TXT := $(BUILD_DIR)/output_path.txt
-$(BUILD_DIR)/output_path.txt: | $(BUILD_DIR)
-endif
 	@# Write output path into txt file so later
 	@# can be retrieved
 	$Q$(ECHO) "$(FINAL_PRODUCT)" > $@
