@@ -58,7 +58,9 @@ MAKEOVERRIDES :=
 .EXPORT_ALL_VARIABLES:
 .NOTPARALLEL:
 cmd_%: PROJECT_DIR := $(ABS_PROJECT_DIR)
+proj_%: PROJECT_DIR := $(ABS_PROJECT_DIR)
 cmd_%: alt_phony
+proj_%: alt_phony
 ifdef TEMP_DIR_GENERATED
 	@trap 'rm -rf $(TEMP_DIR)' EXIT; \
 	$(MAKE) -ef UwUMakerMain.mak $@

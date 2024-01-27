@@ -157,4 +157,14 @@ cmd_sanitize: cmd_clean_cache
 	$Q$(PRINT_STATUS) RM "Deleting $(BUILD_DIR) dir"
 	-$Q$(RMDIR) -f -- $(BUILD_DIR)
 
+.PHONY: forcePhony
+forcePhony:
+	$(NOP)
+
+# Project specific commands
+proj_%: kconfig_gen_config_files forcePhony
+	$Q$(MAKE) -f $(PROJECT_DIR)/Makefile $(MAKECMDGOALS)
+
+
+
 

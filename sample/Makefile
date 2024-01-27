@@ -39,6 +39,8 @@ UwUMaker-shared-lib-subprojects-y += extra_lib_shared
 # or additional libraries
 UwUMaker-always-subprojects-y += helper_program
 
-
+.PHONY: proj_hi
+proj_hi:
+	$Q$(ECHO) "Hiiiii from $@ UwU"
 
 
