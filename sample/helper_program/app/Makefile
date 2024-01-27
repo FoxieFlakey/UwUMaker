@@ -1,4 +1,0 @@
-
-UwUMaker-c-sources-y += main.c
-
-
