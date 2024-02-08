@@ -1,0 +1,14 @@
+[Project]
+name = "Sample"
+type = "exe"
+
+# Subdir section
+[Subdir]
+c-sources = [ "main.c" ]
+
+# Options in any table named CONFIG_* are only applied
+# if CONFIG_* is y
+[CONFIG_COMMON]
+c-sources = [ "common.c" ]
+
+
