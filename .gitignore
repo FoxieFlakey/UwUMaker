@@ -30,3 +30,6 @@ saved.vim
 .config.*
 .cache
 sample/build
+.vscode
+bin/
+obj/
