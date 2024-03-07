@@ -1,7 +1,11 @@
 namespace fox.foxie_flakey.uwumaker {
-  public class Project(string dir)
-  {
-    public readonly string RootDir = dir;
-    public readonly string ConfigPath = Path.Join(dir, "UwUMaker.toml");
+  public class Project {
+    public readonly string RootDir;
+    public readonly string ConfigPath;
+    
+    public Project(string dir) {
+      this.RootDir = dir;
+      this.ConfigPath = Path.Join(dir, "/UwUMaker.toml");
+    }
   }
 }

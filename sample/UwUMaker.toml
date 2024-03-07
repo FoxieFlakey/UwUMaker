@@ -7,8 +7,9 @@ type = "exe"
 c-sources = [ "main.c" ]
 
 # Options in any table named CONFIG_* are only applied
-# if CONFIG_* is y
-[CONFIG_COMMON]
+# if CONFIG_* is y (note for CONFIG_* set to 'm', 
+# CONFIG_*_MODULE is set to 'y')
+[Subdir.CONFIG_COMMON]
 c-sources = [ "common.c" ]
 
 
