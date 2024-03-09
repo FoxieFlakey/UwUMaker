@@ -1,12 +1,12 @@
-﻿using fox.foxie_flakey.uwumaker.project.config;
+﻿namespace fox.foxie_flakey.uwumaker;
 
-namespace fox.foxie_flakey.uwumaker {
-  public class Program {
-    public static void Main() {
-      Console.WriteLine("Hello World! UwU");
-      var config = new ProjectConfig("", Path.Join(Directory.GetCurrentDirectory(), "/UwUMaker.toml"));
-      Console.WriteLine($"Loaded project at '{config.ConfigPath}' as config");
-      Console.WriteLine($"Project name is {config.Name}");
-    }
+public class Program {
+  public static void Main() {
+    Console.WriteLine("Hello World! UwU");
+    var config = new Project(Directory.GetCurrentDirectory());
+    Console.WriteLine($"Loaded project at '{config.ConfigPath}' as config");
+    Console.WriteLine($"Project name is {config.Config.Name}");
+    Console.WriteLine($"Project type is {config.Config.Type}");
+    Console.WriteLine($"CONFIG_HELLO is {config.DotConfig.GetInt("HELLO")}");
   }
 }

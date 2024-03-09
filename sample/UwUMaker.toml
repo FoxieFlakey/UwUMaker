@@ -1,6 +1,6 @@
 [Project]
 name = "Sample"
-type = "exe"
+type = "executable"
 
 # Subdir section
 [Subdir]
