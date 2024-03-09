@@ -1,19 +1,17 @@
-namespace fox.foxie_flakey.uwumaker;
+namespace fox.foxie_flakey.uwumaker.project;
 
 using fox.foxie_flakey.uwumaker.config;
+using Tomlyn;
 
 public class Project {
   public string RootDir;
   public string ConfigPath;
   public string DotConfigPath;
+  
   public ProjectConfig Config;
   public DotConfig DotConfig;
   
   public Project(string dir, DotConfig? dotConfig) {
-    this.RootDir = dir;
-    this.ConfigPath = Path.Join(dir, "/UwUMaker.toml");
-    this.Config = new ProjectConfig(this.ConfigPath);
-    
     if (dotConfig is not null) {
       this.DotConfigPath = dotConfig.Path;
       this.DotConfig = dotConfig;
@@ -21,7 +19,10 @@ public class Project {
       this.DotConfigPath = Path.Join(dir, "/.config");
       this.DotConfig = new DotConfig(this.DotConfigPath);
     }
-    this.Config.ApplyConditional(this.DotConfig);
+    
+    this.RootDir = dir;
+    this.ConfigPath = Path.Join(dir, "/UwUMaker.toml");
+    this.Config = new ProjectConfig(this.ConfigPath, Util.ApplyConditional(Toml.ToModel(File.ReadAllText(this.ConfigPath)), this.DotConfig));
   }
   
   public Project(string dir, string dotConfigPath) : this(dir, new DotConfig(Path.Combine(dir, dotConfigPath))) {

@@ -12,5 +12,5 @@ c-sources = [ "main.c" ]
 
 # If CONFIG_* is y then for arrays
 # its appended
-c-sources-CONFIG_COMMON = [ "common.c" ]
+c-sources-CONFIG_COMPILE_EXTRA = [ "common.c" ]
 

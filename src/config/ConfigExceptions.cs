@@ -1,7 +1,7 @@
 namespace fox.foxie_flakey.uwumaker.config;
 
 public class InvalidConfigException(Config config, string reason)
-    : Exception($"In '{config.Path}' config: " + reason) {
+    : Exception($"In '{config.ConfigPath}' config: " + reason) {
   public Config Config = config;
 }
 
