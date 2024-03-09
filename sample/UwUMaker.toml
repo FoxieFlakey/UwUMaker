@@ -2,14 +2,15 @@
 name = "Sample"
 type = "executable"
 
+# If CONFIG_* is y then for non array
+# its overwritten
+name-CONFIG_SWAP_NAME = "Swapped"
+
 # Subdir section
 [Subdir]
 c-sources = [ "main.c" ]
 
-# Options in any table named CONFIG_* are only applied
-# if CONFIG_* is y (note for CONFIG_* set to 'm', 
-# CONFIG_*_MODULE is set to 'y')
-[Subdir.CONFIG_COMMON]
-c-sources = [ "common.c" ]
-
+# If CONFIG_* is y then for arrays
+# its appended
+c-sources-CONFIG_COMMON = [ "common.c" ]
 

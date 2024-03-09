@@ -8,5 +8,6 @@ public class Program {
     Console.WriteLine($"Project name is {config.Config.Name}");
     Console.WriteLine($"Project type is {config.Config.Type}");
     Console.WriteLine($"CONFIG_HELLO is {config.DotConfig.GetInt("HELLO")}");
+    Console.WriteLine($"CONFIG_SWAP_NAME is {config.DotConfig.GetBool("SWAP_NAME")}");
   }
 }

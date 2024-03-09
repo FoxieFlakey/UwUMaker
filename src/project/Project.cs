@@ -21,6 +21,7 @@ public class Project {
       this.DotConfigPath = Path.Join(dir, "/.config");
       this.DotConfig = new DotConfig(this.DotConfigPath);
     }
+    this.Config.ApplyConditional(this.DotConfig);
   }
   
   public Project(string dir, string dotConfigPath) : this(dir, new DotConfig(Path.Combine(dir, dotConfigPath))) {

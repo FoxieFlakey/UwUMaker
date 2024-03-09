@@ -45,7 +45,6 @@ public class DotConfig {
       case '5': case '6': case '7': case '8': case '9':
         try {
           this.Options[key] = Int32.Parse(value);
-          Console.WriteLine($"Key {key} assigned by {value}");
         } catch (FormatException e) {
           throw new InvalidDataException($"Error parsing integer at line {lineNumber}", e);
         }
@@ -84,7 +83,7 @@ public class DotConfig {
     return (int) this.Options[key];
   }
 
-  public Boolean IsExist(string key) {
+  public Boolean ContainsKey(string key) {
     return this.Options.ContainsKey(key);
   }
 }
