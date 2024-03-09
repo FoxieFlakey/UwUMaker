@@ -1,0 +1,12 @@
+mainmenu "Hello"
+
+config COMPILE_EXTRA
+  bool "Compile extra?"
+
+config SAY_HI_INSTEAD_HELLO
+  bool "Say hi instead hello"
+  depends on HELLO
+
+config HELLO
+  bool "Say hello"
+  

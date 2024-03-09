@@ -21,24 +21,28 @@ public partial class Config {
   
   [GeneratedRegex("^(.+)[-]CONFIG_(.+?)$")]
   private static partial Regex ConditionalKeyMatchRegex();
-  private void ApplyConditionalOnOne(TomlTable table, DotConfig dotConfig) {
-    foreach (string currentField in table.Keys) {
-      IList<Match> match = ConditionalKeyMatchRegex().Matches(currentField);
+  private void ApplyConditionalOnOne(TomlTable table, DotConfig dotConfig, Queue<TomlTable> queueOfTables) {
+    foreach (var current in table) {
+      string currentKey = current.Key;
+      
+      if (current.Value is TomlTable innerTable)
+        queueOfTables.Enqueue(innerTable);
+      
+      // Match the key specially named like name-CONFIG_BLAH
+      IList<Match> match = ConditionalKeyMatchRegex().Matches(currentKey);
       if (match.Count == 0)
         continue;
       
       string targetField = match[0].Groups[1].Value;
       string configKey = match[0].Groups[2].Value;
       
-      Console.WriteLine($"Attempting to '{targetField}' with config '{configKey}' from '{currentField}'");
-      
       // The corresponding config key isn't enabled
       // or missing so skip
       if (!dotConfig.ContainsKey(configKey) || !dotConfig.GetBool(configKey))
         continue;
       
-      table[targetField] = table[currentField];
-      table.Remove(currentField);
+      table[targetField] = table[currentKey];
+      table.Remove(currentKey);
     }
   }
   
@@ -46,13 +50,11 @@ public partial class Config {
     if (ConditionalApplied)
       return;
     
-    // Apply condition to self first
-    this.ApplyConditionalOnOne(this.ConfigTable, dotConfig);
-    
-    foreach (object value in this.ConfigTable.Values) {
-      if (value is not TomlTable)
-        continue;
-      this.ApplyConditionalOnOne((TomlTable) value, dotConfig);
+    Queue<TomlTable> queue = new(100);
+    queue.Enqueue(this.ConfigTable);
+    while (queue.Count > 0) {
+      TomlTable current = queue.Dequeue();
+      this.ApplyConditionalOnOne(current, dotConfig, queue);
     }
     
     ConditionalApplied = true;
