@@ -1,8 +1,8 @@
 namespace fox.foxie_flakey.uwumaker.project;
 
 public interface ICompileableUnit {
-  // Returns true if success or false if failed
-  public Task<bool> Compile();
+  // Returns path to output if success or null if failed
+  public Task<string?> Compile();
   
   // Cleans generated result
   public Task Clean();

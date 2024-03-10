@@ -9,7 +9,7 @@ public class Program {
     var project = new Project(Directory.GetCurrentDirectory());
     Console.WriteLine($"Project name is {project.Config.Name}");
     Console.WriteLine($"Project type is {project.Config.Type}");
-    bool compileResult = project.Compile().GetAwaiter().GetResult();
-    Console.WriteLine($"Compile result = {compileResult}");
+    string? compileResult = project.Compile().GetAwaiter().GetResult();
+    Console.WriteLine($"Compile result at = {compileResult}");
   }
 }

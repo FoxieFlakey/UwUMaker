@@ -3,7 +3,7 @@ using System.Text;
 
 namespace fox.foxie_flakey.uwumaker;
 
-public partial class Util {
+public class Util {
   public static void EnsureDir(string path) {
     if (Directory.Exists(path))
       return;

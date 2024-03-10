@@ -26,10 +26,15 @@ public class Subdir : ICompileableUnit {
     return Task.CompletedTask;
   }
 
-  public async Task<bool> Compile() {
-    foreach (var source in this.Sources)
-      if (!await source.Compile())
-        return false;
-    return true;
+  public async Task<string?> Compile() {
+    List<string> objectFiles = [];
+    foreach (var source in this.Sources) {
+      var outputPath = await source.Compile();
+      if (outputPath is null)
+        return null;
+      
+      objectFiles.Add(outputPath);
+    }
+    return "";
   }
 }

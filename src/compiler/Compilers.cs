@@ -6,8 +6,9 @@ public interface ICompiler {
   public string GetFullName();
   public string GetShortName();
   
-  // Compile must generate linkable output at "outputPath" given source "sourcePath"
-  // with "options" as the options
+  // Compile must generate linkable output at "outputPath" given
+  // source "sourcePath" with "options" as the options
+  // Return false if failed or true if sucess
   public Task<bool> Compile(string sourcePath, string outputPath);
 }
 

@@ -1,5 +1,7 @@
 namespace fox.foxie_flakey.uwumaker.project;
 
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using fox.foxie_flakey.uwumaker.config;
 using Tomlyn;
 
@@ -36,7 +38,7 @@ public class Project : ICompileableUnit {
   public Project(string dir) : this(dir, dotConfig: null) {
   }
   
-  public async Task<bool> Compile() {
+  public async Task<string?> Compile() {
     uwumaker.Util.EnsureDir(this.BuildDir);
     uwumaker.Util.EnsureDir(this.BuildObjectsDir);
     return await this.RootDir.Compile(); 
@@ -48,6 +50,27 @@ public class Project : ICompileableUnit {
   
   public async Task CleanSanitize() {
     await ((ICompileableUnit) this.RootDir).CleanSanitize();
+  }
+  
+  private static readonly JsonSerializerOptions JsonOpts = new() {
+    IncludeFields = true
+  };
+  
+  private struct OutputMetadata {
+    public string InputPath;
+  };
+  
+  public async Task<string> GenOutputPath(string uniqueID, string postfix) {
+    string hash = uwumaker.Util.HashSHA256(uniqueID);
+    string outputPath = Path.Join(this.BuildObjectsDir, hash + postfix);
+    string metadataPath = Path.Join(this.BuildObjectsDir, hash + postfix + ".json");
+    
+    OutputMetadata meta = new() {
+      InputPath = uniqueID
+    };
+    
+    await File.WriteAllTextAsync(metadataPath, JsonSerializer.Serialize(meta, JsonOpts));
+    return outputPath;
   }
   
   public enum Type {
