@@ -35,11 +35,11 @@ public class CompilerRegistry {
     {"c", new CCompiler()}
   };
   
-  public static ICompiler GetCompilerFor(string id) {
-    return CompilerRegistry.Compilers[id];
+  public static ICompiler GetCompilerFor(string langID) {
+    return CompilerRegistry.Compilers[langID];
   }
   
-  public static void Register(string id, ICompiler compiler) {
-    CompilerRegistry.Compilers[id] = compiler;
+  public static void Register(string langID, ICompiler compiler) {
+    CompilerRegistry.Compilers[langID] = compiler;
   }
 }

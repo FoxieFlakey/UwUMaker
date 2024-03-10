@@ -7,7 +7,8 @@ using System.Collections.Generic;
 
 public class SubdirConfig : Config {
   public readonly Project ParentProject;
-  public readonly IList<string> SourceFiles;
+  // Mapping from lang ID to list of sources
+  public readonly IDictionary<string, IList<string>> SourceFiles = new Dictionary<string, IList<string>>();
   
   // Only for root subdir
   public SubdirConfig(string subdirPath, Project parentProject) : base(parentProject.ConfigPath, parentProject.Config.Get<TomlTable>("Subdir")) {
@@ -20,6 +21,6 @@ public class SubdirConfig : Config {
       files.Add(Path.Join(subdirPath, (string) source));
     }
     
-    this.SourceFiles = files.AsReadOnly();
+    this.SourceFiles["c"] = files.AsReadOnly();
   }
 }
