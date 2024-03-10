@@ -8,9 +8,9 @@ name-CONFIG_SWAP_NAME = "Swapped"
 
 # Subdir section
 [Subdir]
-c-sources = [ "main.c" ]
+sources-c = [ "main.c" ]
 
 # If CONFIG_* is y then for arrays
 # its appended
-c-sources-CONFIG_COMPILE_EXTRA = [ "common.c" ]
+sources-c-CONFIG_COMPILE_EXTRA = [ "common.c" ]
 
