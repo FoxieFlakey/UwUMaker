@@ -9,7 +9,7 @@ public class SourceFile(ICompiler compiler, string path, Subdir origin) {
   public readonly Subdir Origin = origin;
   
   public async Task<string?> Compile() {
-    Console.WriteLine($"[ {this.Compiler.GetShortName().PadRight(10)} ] {this.Path}");
+    await this.Origin.ParentProject.PrintOutput(this.Compiler.GetShortName(), this.Path);
     string outputPath = await this.Origin.ParentProject.GenOutputPath(this.Path, ".o");
     
     // Failed to compile

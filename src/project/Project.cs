@@ -1,5 +1,6 @@
 namespace fox.foxie_flakey.uwumaker.project;
 
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using fox.foxie_flakey.uwumaker.config;
@@ -41,7 +42,23 @@ public class Project : ICompileableUnit {
   public async Task<string?> Compile() {
     uwumaker.Util.EnsureDir(this.BuildDir);
     uwumaker.Util.EnsureDir(this.BuildObjectsDir);
-    return await this.RootDir.Compile(); 
+    string? finalObjectFile = await this.RootDir.Compile(); 
+    if (finalObjectFile is null)
+      return null;
+    string linkOutput = await this.GenOutputPath(this.RootDir.SubdirPath, "");
+    
+    string[] linkCommand = [
+      "cc",
+      "-o",
+      linkOutput,
+      "--",
+      finalObjectFile
+    ];
+    
+    await this.PrintOutput("LD", linkOutput);
+    var process = Process.Start("/usr/bin/env", linkCommand);
+    await process.WaitForExitAsync();
+    return linkOutput;
   }
   
   public async Task Clean() {
@@ -71,6 +88,10 @@ public class Project : ICompileableUnit {
     
     await File.WriteAllTextAsync(metadataPath, JsonSerializer.Serialize(meta, JsonOpts));
     return outputPath;
+  }
+  
+  public async Task PrintOutput(string tool, string message) {
+    await Console.Out.WriteLineAsync($"[ {tool,-10} ] {message}");
   }
   
   public enum Type {
