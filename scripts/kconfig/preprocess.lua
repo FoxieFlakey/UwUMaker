@@ -72,16 +72,20 @@ function preprocOneFile(inputPath, outputPath)
     substDepth = 0
     line = doSubst(line)
     
-    outputHandle:write(line)
-    outputHandle:write("\n")
 
     -- Include detected!
     local includePath = select(2, string.match(line, "^[ ]*source[ ]*([\"\'])(.-)%1"))
     if includePath then
+    --print("UwU        ", line, " ----- ", string.match(line, "^[ ]*source[ ]*([\"\'])(.-)%1"))
       -- Gsub away file name part and create directory structure UwU
       preprocOneFile(inputDir.."/"..includePath, outputDir.."/"..includePath)
+      outputHandle:write("source '"..outputDir.."/"..includePath.."'")
+    else
+      outputHandle:write(line)
     end
 
+    outputHandle:write("\n")
+    
     current.line = current.line + 1
   end
 

@@ -40,7 +40,7 @@ define gen_rule
 $$(LANG_$1_OBJS_DIR)/%.o: $(ABSOLUTE_SUBDIR)/% $(KCONFIG_LANG_CONFIG_DIR)/kconfig_config.h | $$(LANG_$1_OBJS_DIR) $(LANG_RULES_SUBDIR) $(TEMP_DIR)
 	@$(PRINT_STATUS) $$(tool) "$(SUBDIR)/$$(<:$(ABSOLUTE_SUBDIR)/%=%)"
 	$Q$(MKDIR) $$(dir $$@) $$(dir $$(<:$(ABSOLUTE_SUBDIR)/%=$(LANG_RULES_SUBDIR)/%.d))	
-	$Q$(LUA) scripts/lang/gen_compile_command_json_fragment.lua "$(BUILD_DIR)" "$$<" "$$@" "$(CC) $$(compile_flags)" > $$(@:%=%_compile_command.json)
+	$Q$(LUA) scripts/lang/gen_compile_command_json_fragment.lua "$(BUILD_DIR)" "$$<" "$$@" "$(CC) $$(subst $\',$\'$\"$\'$\"$\',$$(compile_flags))" > $$(@:%=%_compile_command.json)
 	$Qcd $(BUILD_DIR) && $(CC) $$(compile_flags)
 
 endef
