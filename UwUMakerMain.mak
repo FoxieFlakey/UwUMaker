@@ -86,7 +86,9 @@ export TRUNCATE	?= truncate
 ########
 
 # Compiler and binutils
-export LD				?= ld.lld
+# Using clang as LD instead bare ld because its a pain
+# because ld itself is so braindead TwT
+export LD				?= clang
 export CC				?= clang
 export AR				?= llvm-ar
 export OBJCOPY	?= llvm-objcopy

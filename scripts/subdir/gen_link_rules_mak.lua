@@ -84,13 +84,13 @@ end
 -- these types
 function link_executable()
   appendOutput("\t$Q$(PRINT_STATUS) LD 'Linking $(@:$(abspath "..OBJS_DIR..")%=%)'\n")
-	appendOutput("\t$Q"..os.getenv("AR").." t "..ARCHIVE_NAME.." | xargs "..os.getenv("CC").." "..LINK_FLAGS.." -o $@\n")
+	appendOutput("\t$Q"..os.getenv("AR").." t "..ARCHIVE_NAME.." | xargs "..os.getenv("LD").." -Wl,--unresolved-symbols=report-all "..LINK_FLAGS.." -o $@\n")
 end
 
 function link_shared_lib()
   appendOutput("\t$Q$(PRINT_STATUS) LD 'Linking $(@:$(abspath "..OBJS_DIR..")%=%)'\n")
 	--appendOutput("\t$Q"..os.getenv("LD").." --whole-archive "..LINK_FLAGS.." -shared "..ARCHIVE_NAME.." -o $@\n")
-  appendOutput("\t$Q"..os.getenv("AR").." t "..ARCHIVE_NAME.." | xargs "..os.getenv("CC").." "..LINK_FLAGS.." -shared -o $@\n")
+  appendOutput("\t$Q"..os.getenv("AR").." t "..ARCHIVE_NAME.." | xargs "..os.getenv("LD").." -Wl,--unresolved-symbols=report-all "..LINK_FLAGS.." -shared -o $@\n")
 end
 
 function link_archive()
