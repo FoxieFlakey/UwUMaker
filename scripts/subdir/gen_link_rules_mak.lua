@@ -40,16 +40,16 @@ local OBJS_DIR<const> = assert(os.getenv("OBJS_DIR"), "Please set OBJS_DIR env")
 local SUBDIR<const> = assert(os.getenv("SUBDIR"), "Please export SUBDIR env")
 local IS_TOP_SUBDIR<const> = SUBDIR == "/"
 
-local linkerFlags = LINK_FLAGS
+local linkerFlagsTail = LINK_FLAGS_TAIL
 
 -- Generate link flags from SHARED_OBJECTS
 forEachObject(SHARED_OBJECTS, function (obj)
-  linkerFlags = linkerFlags..((" -L$(dir $(shell cat %s)) -l$(patsubst lib%%"..SHARED_LIB_EXTENSION..",%%,$(notdir $(shell cat %s)))"):format(obj, obj))
+  linkerFlagsTail = linkerFlagsTail..((" -L$(dir $(shell cat %s)) -l$(patsubst lib%%"..SHARED_LIB_EXTENSION..",%%,$(notdir $(shell cat %s)))"):format(obj, obj))
 end)
 
 -- Generate link flags from STATIC_OBJECTS
 forEachObject(STATIC_OBJECTS, function (obj)
-  linkerFlags = linkerFlags.." $(shell cat "..obj..")"
+  linkerFlagsTail = linkerFlagsTail.." $(shell cat "..obj..")"
 end)
 
 local linkPrereqs = ""
@@ -67,8 +67,8 @@ forEachObject(ALWAYS_OBJECTS, function (obj)
   end
 end)
 
-local LINK_FLAGS<const> = linkerFlags
-linkerFlags = nil
+local LINK_FLAGS_TAIL<const> = linkerFlagsTail
+linkerFlagsTail = nil
 
 local makeIncludes = ""
 makeIncludes = makeIncludes.." "..genIncludes(ALWAYS_OBJECTS)
@@ -85,13 +85,13 @@ end
 -- these types
 function link_executable()
   appendOutput("\t$Q$(PRINT_STATUS) LD 'Linking $(@:$(abspath "..OBJS_DIR..")%=%)'\n")
-  appendOutput("\t$Q"..os.getenv("LD").." -v -Wl,--unresolved-symbols=report-all "..LINK_FLAGS.." $("..os.getenv("AR").." t "..ARCHIVE_NAME.." | tr '\\n' ' ') "..LINK_FLAGS_TAIL.." -o $@\n")
+  appendOutput("\t$Q"..os.getenv("LD").." -Wl,--unresolved-symbols=report-all "..LINK_FLAGS.." $(shell "..os.getenv("AR").." t "..ARCHIVE_NAME.." | tr '\\n' ' ') "..LINK_FLAGS_TAIL.." -o $@\n")
 end
 
 function link_shared_lib()
   appendOutput("\t$Q$(PRINT_STATUS) LD 'Linking $(@:$(abspath "..OBJS_DIR..")%=%)'\n")
 	--appendOutput("\t$Q"..os.getenv("LD").." --whole-archive "..LINK_FLAGS.." -shared "..ARCHIVE_NAME.." -o $@\n")
-  appendOutput("\t$Q"..os.getenv("LD").." -v -Wl,--unresolved-symbols=report-all "..LINK_FLAGS.." $("..os.getenv("AR").." t "..ARCHIVE_NAME.." | tr '\\n' ' ') -shared "..LINK_FLAGS_TAIL.." -o $@\n")
+  appendOutput("\t$Q"..os.getenv("LD").." -Wl,--unresolved-symbols=report-all "..LINK_FLAGS.." $(shell "..os.getenv("AR").." t "..ARCHIVE_NAME.." | tr '\\n' ' ') -shared "..LINK_FLAGS_TAIL.." -o $@\n")
 end
 
 function link_archive()

@@ -8,7 +8,7 @@ $(error "pkg-config cannot find all libraries see above")
 endif
 
 UwUMaker-c-flags-y += $(shell pkg-config --cflags $(UwUMaker-pkg-config-libs-y))
-UwUMaker-linker-flags-y += $(shell pkg-config --libs $(UwUMaker-pkg-config-libs-y))
+UwUMaker-linker-tail-flags-y += $(shell pkg-config --libs $(UwUMaker-pkg-config-libs-y))
 endif
 else
 ifdef UwUMaker-pkg-config-libs-y
